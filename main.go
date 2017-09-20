@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/JormungandrK/microservice-apps-management/app"
+	"github.com/JormungandrK/microservice-apps-management/db"
 	"github.com/JormungandrK/microservice-tools/gateway"
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"
@@ -26,8 +27,23 @@ func main() {
 	service.Use(middleware.ErrorHandler(service, true))
 	service.Use(middleware.Recover())
 
+	// Load MongoDB ENV variables
+	host, username, password, database := loadMongnoSettings()
+	// Create new session to MongoDB
+	session := db.NewSession(host, username, password, database)
+
+	// At the end close session
+	defer session.Close()
+
+	// Create apps collection and indexes
+	index1 := []string{"name", "domain"}
+	index2 := []string{"domain"}
+	indexes := [][]string{index1, index2}
+	collectionName := "apps"
+	collection := db.PrepareDB(session, database, collectionName, indexes)
+
 	// Mount "apps" controller
-	c := NewAppsController(service)
+	c := NewAppsController(service, &db.MongoCollection{collection})
 	app.MountAppsController(service, c)
 	// Mount "swagger" controller
 	c2 := NewSwaggerController(service)
@@ -38,6 +54,28 @@ func main() {
 		service.LogError("startup", "err", err)
 	}
 
+}
+
+func loadMongnoSettings() (string, string, string, string) {
+	host := os.Getenv("MONGO_URL")
+	username := os.Getenv("MS_USERNAME")
+	password := os.Getenv("MS_PASSWORD")
+	database := os.Getenv("MS_DBNAME")
+
+	if host == "" {
+		host = "127.0.0.1:27017"
+	}
+	if username == "" {
+		username = "restapi"
+	}
+	if password == "" {
+		password = "restapi"
+	}
+	if database == "" {
+		database = "apps-management"
+	}
+
+	return host, username, password, database
 }
 
 func loadGatewaySettings() (string, string) {

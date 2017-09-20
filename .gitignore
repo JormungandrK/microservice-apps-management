@@ -1,5 +1,6 @@
 # Executables for the service
 apps
+tool/apps-management-cli/apps-cli
 
 # Binaries for programs and plugins
 *.exe

@@ -30,12 +30,6 @@ func (ut *appPayload) Validate() (err error) {
 	if ut.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`request`, "name"))
 	}
-	if ut.Description == nil {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`request`, "description"))
-	}
-	if ut.Domain == nil {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`request`, "domain"))
-	}
 	if ut.Description != nil {
 		if utf8.RuneCountInString(*ut.Description) > 300 {
 			err = goa.MergeErrors(err, goa.InvalidLengthError(`request.description`, *ut.Description, utf8.RuneCountInString(*ut.Description), 300, false))
@@ -58,10 +52,10 @@ func (ut *appPayload) Validate() (err error) {
 func (ut *appPayload) Publicize() *AppPayload {
 	var pub AppPayload
 	if ut.Description != nil {
-		pub.Description = *ut.Description
+		pub.Description = ut.Description
 	}
 	if ut.Domain != nil {
-		pub.Domain = *ut.Domain
+		pub.Domain = ut.Domain
 	}
 	if ut.Name != nil {
 		pub.Name = *ut.Name
@@ -72,9 +66,9 @@ func (ut *appPayload) Publicize() *AppPayload {
 // Payload for the client apps
 type AppPayload struct {
 	// Description of the app
-	Description string `form:"description" json:"description" xml:"description"`
+	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
 	// App domain
-	Domain string `form:"domain" json:"domain" xml:"domain"`
+	Domain *string `form:"domain,omitempty" json:"domain,omitempty" xml:"domain,omitempty"`
 	// Name of the app
 	Name string `form:"name" json:"name" xml:"name"`
 }
@@ -84,17 +78,15 @@ func (ut *AppPayload) Validate() (err error) {
 	if ut.Name == "" {
 		err = goa.MergeErrors(err, goa.MissingAttributeError(`type`, "name"))
 	}
-	if ut.Description == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`type`, "description"))
+	if ut.Description != nil {
+		if utf8.RuneCountInString(*ut.Description) > 300 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError(`type.description`, *ut.Description, utf8.RuneCountInString(*ut.Description), 300, false))
+		}
 	}
-	if ut.Domain == "" {
-		err = goa.MergeErrors(err, goa.MissingAttributeError(`type`, "domain"))
-	}
-	if utf8.RuneCountInString(ut.Description) > 300 {
-		err = goa.MergeErrors(err, goa.InvalidLengthError(`type.description`, ut.Description, utf8.RuneCountInString(ut.Description), 300, false))
-	}
-	if err2 := goa.ValidateFormat(goa.FormatURI, ut.Domain); err2 != nil {
-		err = goa.MergeErrors(err, goa.InvalidFormatError(`type.domain`, ut.Domain, goa.FormatURI, err2))
+	if ut.Domain != nil {
+		if err2 := goa.ValidateFormat(goa.FormatURI, *ut.Domain); err2 != nil {
+			err = goa.MergeErrors(err, goa.InvalidFormatError(`type.domain`, *ut.Domain, goa.FormatURI, err2))
+		}
 	}
 	if utf8.RuneCountInString(ut.Name) > 50 {
 		err = goa.MergeErrors(err, goa.InvalidLengthError(`type.name`, ut.Name, utf8.RuneCountInString(ut.Name), 50, false))

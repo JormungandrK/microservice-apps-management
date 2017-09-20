@@ -73,7 +73,7 @@ var AppPayload = Type("AppPayload", func() {
 		Format("uri")
 	})
 
-	Required("name", "description", "domain")
+	Required("name")
 })
 
 // Swagger UI
