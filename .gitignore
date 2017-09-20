@@ -1,3 +1,6 @@
+# Executables for the service
+apps
+
 # Binaries for programs and plugins
 *.exe
 *.dll
