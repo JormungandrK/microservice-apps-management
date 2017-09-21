@@ -54,11 +54,29 @@ func (mt *Apps) Validate() (err error) {
 	if utf8.RuneCountInString(mt.Description) > 300 {
 		err = goa.MergeErrors(err, goa.InvalidLengthError(`response.description`, mt.Description, utf8.RuneCountInString(mt.Description), 300, false))
 	}
-	if err2 := goa.ValidateFormat(goa.FormatURI, mt.Domain); err2 != nil {
-		err = goa.MergeErrors(err, goa.InvalidFormatError(`response.domain`, mt.Domain, goa.FormatURI, err2))
-	}
 	if utf8.RuneCountInString(mt.Name) > 50 {
 		err = goa.MergeErrors(err, goa.InvalidLengthError(`response.name`, mt.Name, utf8.RuneCountInString(mt.Name), 50, false))
+	}
+	return
+}
+
+// reg-apps media type (default view)
+//
+// Identifier: application/vnd.goa.reg.apps+json; view=default
+type RegApps struct {
+	// App ID
+	ID string `form:"id" json:"id" xml:"id"`
+	// Client secret
+	Secret string `form:"secret" json:"secret" xml:"secret"`
+}
+
+// Validate validates the RegApps media type instance.
+func (mt *RegApps) Validate() (err error) {
+	if mt.ID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
+	}
+	if mt.Secret == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "secret"))
 	}
 	return
 }

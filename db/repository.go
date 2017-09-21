@@ -1,6 +1,8 @@
 package db
 
 import (
+	"crypto/rand"
+	"encoding/json"
 	"time"
 
 	"gopkg.in/mgo.v2"
@@ -8,12 +10,16 @@ import (
 
 	"github.com/JormungandrK/microservice-apps-management/app"
 	"github.com/goadesign/goa"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // AppRepository defaines the interface for accessing the application data.
 type AppRepository interface {
 	// GetApp looks up a applications by the app ID.
 	GetApp(appID string) (*app.Apps, error)
+	GetUserApps(userID string) ([]byte, error)
+	RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error)
 }
 
 // MongoCollection wraps a mgo.Collection to embed methods in models.
@@ -83,11 +89,74 @@ func (c *MongoCollection) GetApp(appID string) (*app.Apps, error) {
 	return res, nil
 }
 
+func (c *MongoCollection) GetUserApps(userID string) ([]byte, error) {
+	objectID, err := hexToObjectID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var apps []map[string]interface{}
+	if err := c.Find(bson.M{"owner": objectID}).Sort("registeredat").All(&apps); err != nil {
+		return nil, goa.ErrInternal(err)
+	}
+
+	if len(apps) == 0 {
+		return nil, goa.ErrNotFound("No apps found!")
+	}
+
+	for _, client := range apps {
+		client["id"] = client["_id"]
+		delete(client, "_id")
+	}
+
+	res, err := json.Marshal(apps)
+	if err != nil {
+		return nil, goa.ErrInternal(err)
+	}
+
+	return res, nil
+}
+
+func (c *MongoCollection) RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error) {
+	appID := bson.NewObjectIdWithTime(time.Now())
+	registeredAt := int(time.Now().Unix())
+	b, _ := generateSecret(42)
+	hashedSecret, err := bcrypt.GenerateFromPassword(b, bcrypt.DefaultCost)
+	if err != nil {
+		return nil, goa.ErrInternal(err)
+	}
+	secret := string(hashedSecret)
+
+	err = c.Insert(bson.M{
+		"_id":          appID,
+		"name":         payload.Name,
+		"description":  payload.Description,
+		"domain":       payload.Domain,
+		"owner":        userID,
+		"secret":       secret,
+		"registeredat": registeredAt,
+	})
+
+	if err != nil {
+		if mgo.IsDup(err) {
+			return nil, goa.ErrBadRequest("application already exists in the database")
+		}
+		return nil, goa.ErrInternal(err)
+	}
+
+	res := &app.RegApps{
+		ID:     appID.Hex(),
+		Secret: secret,
+	}
+
+	return res, nil
+}
+
 // Convert hex representation of object id to bson object id
 func hexToObjectID(hexID string) (bson.ObjectId, error) {
 	// Return whether userID is a valid hex representation of object id.
 	if bson.IsObjectIdHex(hexID) != true {
-		return "", goa.ErrBadRequest("invalid metadata ID")
+		return "", goa.ErrBadRequest("invalid ID")
 	}
 
 	// Return an ObjectId from the provided hex representation.
@@ -99,4 +168,13 @@ func hexToObjectID(hexID string) (bson.ObjectId, error) {
 	}
 
 	return objectID, nil
+}
+
+func generateSecret(n int) ([]byte, error) {
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }

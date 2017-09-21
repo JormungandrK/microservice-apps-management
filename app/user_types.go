@@ -35,11 +35,6 @@ func (ut *appPayload) Validate() (err error) {
 			err = goa.MergeErrors(err, goa.InvalidLengthError(`request.description`, *ut.Description, utf8.RuneCountInString(*ut.Description), 300, false))
 		}
 	}
-	if ut.Domain != nil {
-		if err2 := goa.ValidateFormat(goa.FormatURI, *ut.Domain); err2 != nil {
-			err = goa.MergeErrors(err, goa.InvalidFormatError(`request.domain`, *ut.Domain, goa.FormatURI, err2))
-		}
-	}
 	if ut.Name != nil {
 		if utf8.RuneCountInString(*ut.Name) > 50 {
 			err = goa.MergeErrors(err, goa.InvalidLengthError(`request.name`, *ut.Name, utf8.RuneCountInString(*ut.Name), 50, false))
@@ -81,11 +76,6 @@ func (ut *AppPayload) Validate() (err error) {
 	if ut.Description != nil {
 		if utf8.RuneCountInString(*ut.Description) > 300 {
 			err = goa.MergeErrors(err, goa.InvalidLengthError(`type.description`, *ut.Description, utf8.RuneCountInString(*ut.Description), 300, false))
-		}
-	}
-	if ut.Domain != nil {
-		if err2 := goa.ValidateFormat(goa.FormatURI, *ut.Domain); err2 != nil {
-			err = goa.MergeErrors(err, goa.InvalidFormatError(`type.domain`, *ut.Domain, goa.FormatURI, err2))
 		}
 	}
 	if utf8.RuneCountInString(ut.Name) > 50 {

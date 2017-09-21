@@ -18,7 +18,6 @@ var _ = API("apps-management", func() {
 // Resources group related API endpoints together.
 var _ = Resource("apps", func() {
 	BasePath("/apps")
-	DefaultMedia(AppMedia)
 
 	Action("get", func() {
 		Description("Get app by id")
@@ -26,8 +25,37 @@ var _ = Resource("apps", func() {
 		Params(func() {
 			Param("appId", String, "App ID")
 		})
+		Response(OK, AppMedia)
+		Response(NotFound, ErrorMedia)
+		Response(BadRequest, ErrorMedia)
+		Response(InternalServerError, ErrorMedia)
+	})
+
+	Action("getMyApps", func() {
+		Description("Get all user's apps")
+		Routing(GET("/my"))
 		Response(OK)
 		Response(NotFound, ErrorMedia)
+		Response(InternalServerError, ErrorMedia)
+	})
+
+	Action("getUserApps", func() {
+		Description("Get app by id")
+		Routing(GET("/users/:userId/all"))
+		Params(func() {
+			Param("userId", String, "User ID")
+		})
+		Response(OK)
+		Response(NotFound, ErrorMedia)
+		Response(BadRequest, ErrorMedia)
+		Response(InternalServerError, ErrorMedia)
+	})
+
+	Action("registerApp", func() {
+		Description("Register new app")
+		Routing(POST(""))
+		Payload(AppPayload)
+		Response(Created, RegAppMedia)
 		Response(BadRequest, ErrorMedia)
 		Response(InternalServerError, ErrorMedia)
 	})
@@ -59,6 +87,22 @@ var AppMedia = MediaType("application/vnd.goa.apps+json", func() {
 	})
 })
 
+// RegAppMedia defines the media type used to render client apps.
+var RegAppMedia = MediaType("application/vnd.goa.reg.apps+json", func() {
+	TypeName("reg-apps")
+
+	Attributes(func() {
+		Attribute("id", String, "App ID")
+		Attribute("secret", String, "Client secret")
+		Required("id", "secret")
+	})
+
+	View("default", func() {
+		Attribute("id")
+		Attribute("secret")
+	})
+})
+
 // AppsPayload defines the payload for the client apps.
 var AppPayload = Type("AppPayload", func() {
 	Description("Payload for the client apps")
@@ -69,9 +113,7 @@ var AppPayload = Type("AppPayload", func() {
 	Attribute("description", String, "Description of the app", func() {
 		MaxLength(300)
 	})
-	Attribute("domain", String, "App domain", func() {
-		Format("uri")
-	})
+	Attribute("domain", String, "App domain")
 
 	Required("name")
 })

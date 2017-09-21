@@ -36,6 +36,25 @@ type (
 		PrettyPrint bool
 	}
 
+	// GetMyAppsAppsCommand is the command line data structure for the getMyApps action of apps
+	GetMyAppsAppsCommand struct {
+		PrettyPrint bool
+	}
+
+	// GetUserAppsAppsCommand is the command line data structure for the getUserApps action of apps
+	GetUserAppsAppsCommand struct {
+		// User ID
+		UserID      string
+		PrettyPrint bool
+	}
+
+	// RegisterAppAppsCommand is the command line data structure for the registerApp action of apps
+	RegisterAppAppsCommand struct {
+		Payload     string
+		ContentType string
+		PrettyPrint bool
+	}
+
 	// DownloadCommand is the command line data structure for the download command.
 	DownloadCommand struct {
 		// OutFile is the path to the download output file.
@@ -58,6 +77,57 @@ func RegisterCommands(app *cobra.Command, c *client.Client) {
 	}
 	tmp1.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp1.PrettyPrint, "pp", false, "Pretty print response body")
+	command.AddCommand(sub)
+	app.AddCommand(command)
+	command = &cobra.Command{
+		Use:   "get-my-apps",
+		Short: `Get all user's apps`,
+	}
+	tmp2 := new(GetMyAppsAppsCommand)
+	sub = &cobra.Command{
+		Use:   `apps ["/apps/my"]`,
+		Short: ``,
+		RunE:  func(cmd *cobra.Command, args []string) error { return tmp2.Run(c, args) },
+	}
+	tmp2.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp2.PrettyPrint, "pp", false, "Pretty print response body")
+	command.AddCommand(sub)
+	app.AddCommand(command)
+	command = &cobra.Command{
+		Use:   "get-user-apps",
+		Short: `Get app by id`,
+	}
+	tmp3 := new(GetUserAppsAppsCommand)
+	sub = &cobra.Command{
+		Use:   `apps ["/apps/users/USERID/all"]`,
+		Short: ``,
+		RunE:  func(cmd *cobra.Command, args []string) error { return tmp3.Run(c, args) },
+	}
+	tmp3.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp3.PrettyPrint, "pp", false, "Pretty print response body")
+	command.AddCommand(sub)
+	app.AddCommand(command)
+	command = &cobra.Command{
+		Use:   "register-app",
+		Short: `Register new app`,
+	}
+	tmp4 := new(RegisterAppAppsCommand)
+	sub = &cobra.Command{
+		Use:   `apps ["/apps"]`,
+		Short: ``,
+		Long: `
+
+Payload example:
+
+{
+   "description": "dquu7sxd1b",
+   "domain": "Mollitia et quasi esse voluptate.",
+   "name": "zzr28p88rb"
+}`,
+		RunE: func(cmd *cobra.Command, args []string) error { return tmp4.Run(c, args) },
+	}
+	tmp4.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp4.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
 	app.AddCommand(command)
 
@@ -297,4 +367,87 @@ func (cmd *GetAppsCommand) Run(c *client.Client, args []string) error {
 func (cmd *GetAppsCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
 	var appID string
 	cc.Flags().StringVar(&cmd.AppID, "appId", appID, `App ID`)
+}
+
+// Run makes the HTTP request corresponding to the GetMyAppsAppsCommand command.
+func (cmd *GetMyAppsAppsCommand) Run(c *client.Client, args []string) error {
+	var path string
+	if len(args) > 0 {
+		path = args[0]
+	} else {
+		path = "/apps/my"
+	}
+	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
+	ctx := goa.WithLogger(context.Background(), logger)
+	resp, err := c.GetMyAppsApps(ctx, path)
+	if err != nil {
+		goa.LogError(ctx, "failed", "err", err)
+		return err
+	}
+
+	goaclient.HandleResponse(c.Client, resp, cmd.PrettyPrint)
+	return nil
+}
+
+// RegisterFlags registers the command flags with the command line.
+func (cmd *GetMyAppsAppsCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+}
+
+// Run makes the HTTP request corresponding to the GetUserAppsAppsCommand command.
+func (cmd *GetUserAppsAppsCommand) Run(c *client.Client, args []string) error {
+	var path string
+	if len(args) > 0 {
+		path = args[0]
+	} else {
+		path = fmt.Sprintf("/apps/users/%v/all", url.QueryEscape(cmd.UserID))
+	}
+	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
+	ctx := goa.WithLogger(context.Background(), logger)
+	resp, err := c.GetUserAppsApps(ctx, path)
+	if err != nil {
+		goa.LogError(ctx, "failed", "err", err)
+		return err
+	}
+
+	goaclient.HandleResponse(c.Client, resp, cmd.PrettyPrint)
+	return nil
+}
+
+// RegisterFlags registers the command flags with the command line.
+func (cmd *GetUserAppsAppsCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+	var userID string
+	cc.Flags().StringVar(&cmd.UserID, "userId", userID, `User ID`)
+}
+
+// Run makes the HTTP request corresponding to the RegisterAppAppsCommand command.
+func (cmd *RegisterAppAppsCommand) Run(c *client.Client, args []string) error {
+	var path string
+	if len(args) > 0 {
+		path = args[0]
+	} else {
+		path = "/apps"
+	}
+	var payload client.AppPayload
+	if cmd.Payload != "" {
+		err := json.Unmarshal([]byte(cmd.Payload), &payload)
+		if err != nil {
+			return fmt.Errorf("failed to deserialize payload: %s", err)
+		}
+	}
+	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
+	ctx := goa.WithLogger(context.Background(), logger)
+	resp, err := c.RegisterAppApps(ctx, path, &payload, cmd.ContentType)
+	if err != nil {
+		goa.LogError(ctx, "failed", "err", err)
+		return err
+	}
+
+	goaclient.HandleResponse(c.Client, resp, cmd.PrettyPrint)
+	return nil
+}
+
+// RegisterFlags registers the command flags with the command line.
+func (cmd *RegisterAppAppsCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+	cc.Flags().StringVar(&cmd.Payload, "payload", "", "Request body encoded in JSON")
+	cc.Flags().StringVar(&cmd.ContentType, "content", "", "Request content type override, e.g. 'application/x-www-form-urlencoded'")
 }

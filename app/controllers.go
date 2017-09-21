@@ -35,6 +35,9 @@ func initService(service *goa.Service) {
 type AppsController interface {
 	goa.Muxer
 	Get(*GetAppsContext) error
+	GetMyApps(*GetMyAppsAppsContext) error
+	GetUserApps(*GetUserAppsAppsContext) error
+	RegisterApp(*RegisterAppAppsContext) error
 }
 
 // MountAppsController "mounts" a Apps resource controller on the given service.
@@ -56,6 +59,72 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 	}
 	service.Mux.Handle("GET", "/apps/:appId", ctrl.MuxHandler("get", h, nil))
 	service.LogInfo("mount", "ctrl", "Apps", "action", "Get", "route", "GET /apps/:appId")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewGetMyAppsAppsContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.GetMyApps(rctx)
+	}
+	service.Mux.Handle("GET", "/apps/my", ctrl.MuxHandler("getMyApps", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "GetMyApps", "route", "GET /apps/my")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewGetUserAppsAppsContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.GetUserApps(rctx)
+	}
+	service.Mux.Handle("GET", "/apps/users/:userId/all", ctrl.MuxHandler("getUserApps", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "GetUserApps", "route", "GET /apps/users/:userId/all")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewRegisterAppAppsContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*AppPayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.RegisterApp(rctx)
+	}
+	service.Mux.Handle("POST", "/apps", ctrl.MuxHandler("registerApp", h, unmarshalRegisterAppAppsPayload))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "RegisterApp", "route", "POST /apps")
+}
+
+// unmarshalRegisterAppAppsPayload unmarshals the request body into the context request data Payload field.
+func unmarshalRegisterAppAppsPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &appPayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
 }
 
 // SwaggerController is the controller interface for the Swagger actions.

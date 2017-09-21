@@ -55,9 +55,6 @@ func (mt *Apps) Validate() (err error) {
 	if utf8.RuneCountInString(mt.Description) > 300 {
 		err = goa.MergeErrors(err, goa.InvalidLengthError(`response.description`, mt.Description, utf8.RuneCountInString(mt.Description), 300, false))
 	}
-	if err2 := goa.ValidateFormat(goa.FormatURI, mt.Domain); err2 != nil {
-		err = goa.MergeErrors(err, goa.InvalidFormatError(`response.domain`, mt.Domain, goa.FormatURI, err2))
-	}
 	if utf8.RuneCountInString(mt.Name) > 50 {
 		err = goa.MergeErrors(err, goa.InvalidLengthError(`response.name`, mt.Name, utf8.RuneCountInString(mt.Name), 50, false))
 	}
@@ -74,6 +71,34 @@ func (c *Client) DecodeApps(resp *http.Response) (*Apps, error) {
 // DecodeErrorResponse decodes the ErrorResponse instance encoded in resp body.
 func (c *Client) DecodeErrorResponse(resp *http.Response) (*goa.ErrorResponse, error) {
 	var decoded goa.ErrorResponse
+	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
+	return &decoded, err
+}
+
+// reg-apps media type (default view)
+//
+// Identifier: application/vnd.goa.reg.apps+json; view=default
+type RegApps struct {
+	// App ID
+	ID string `form:"id" json:"id" xml:"id"`
+	// Client secret
+	Secret string `form:"secret" json:"secret" xml:"secret"`
+}
+
+// Validate validates the RegApps media type instance.
+func (mt *RegApps) Validate() (err error) {
+	if mt.ID == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "id"))
+	}
+	if mt.Secret == "" {
+		err = goa.MergeErrors(err, goa.MissingAttributeError(`response`, "secret"))
+	}
+	return
+}
+
+// DecodeRegApps decodes the RegApps instance encoded in resp body.
+func (c *Client) DecodeRegApps(resp *http.Response) (*RegApps, error) {
+	var decoded RegApps
 	err := c.Decoder.Decode(&decoded, resp.Body, resp.Header.Get("Content-Type"))
 	return &decoded, err
 }
