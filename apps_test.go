@@ -92,3 +92,21 @@ func TestGetUserAppsAppsInternalServerError(t *testing.T) {
 func TestGetUserAppsAppsBadRequest(t *testing.T) {
 	test.GetUserAppsAppsBadRequest(t, ctx, service, ctrl, badReqID)
 }
+
+func TestRegisterAppAppsCreated(t *testing.T) {
+	authObj := &auth.Auth{UserID: ID}
+	ctx = auth.SetAuth(ctx, authObj)
+	test.RegisterAppAppsCreated(t, ctx, service, ctrl, client)
+}
+
+func TestRegisterAppAppsBadRequest(t *testing.T) {
+	authObj := &auth.Auth{UserID: badReqID}
+	ctx = auth.SetAuth(ctx, authObj)
+	test.RegisterAppAppsBadRequest(t, ctx, service, ctrl, client)
+}
+
+func TestRegisterAppAppsInternalServerError(t *testing.T) {
+	authObj := &auth.Auth{UserID: errInternalID}
+	ctx = auth.SetAuth(ctx, authObj)
+	test.RegisterAppAppsInternalServerError(t, ctx, service, ctrl, client)
+}

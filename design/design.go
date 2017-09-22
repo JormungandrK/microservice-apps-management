@@ -59,6 +59,35 @@ var _ = Resource("apps", func() {
 		Response(BadRequest, ErrorMedia)
 		Response(InternalServerError, ErrorMedia)
 	})
+
+	Action("deleteApp", func() {
+		Description("Delete an app")
+		Routing(DELETE("/:appId"))
+		Response(OK)
+		Response(NotFound, ErrorMedia)
+		Response(BadRequest, ErrorMedia)
+		Response(InternalServerError, ErrorMedia)
+	})
+
+	Action("updateApp", func() {
+		Description("Register new app")
+		Routing(PUT("/:appId"))
+		Payload(AppPayload)
+		Response(OK, AppMedia)
+		Response(NotFound, ErrorMedia)
+		Response(BadRequest, ErrorMedia)
+		Response(InternalServerError, ErrorMedia)
+	})
+
+	Action("regenerateClientSecret", func() {
+		Description("Regenerate client secret")
+		Routing(PUT("/:appId/regenerate-secret"))
+		Response(OK)
+		Response(NotFound, ErrorMedia)
+		Response(BadRequest, ErrorMedia)
+		Response(InternalServerError, ErrorMedia)
+	})
+
 })
 
 // AppMedia defines the media type used to render client apps.

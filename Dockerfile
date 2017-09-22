@@ -9,11 +9,11 @@ RUN chmod 700 /root/.ssh/id_rsa && \
     git config --global url."ssh://git@github.com:".insteadOf "https://github.com"
 
 RUN go get -u github.com/goadesign/goa/... && \
+  	go get github.com/asaskevich/govalidator && \
     go get -u gopkg.in/mgo.v2
 
-RUN go get -u github.com/JormungandrK/microservice-tools; exit 0
-
-RUN go get -u github.com/JormungandrK/microservice-security; exit 0
+RUN go get -u github.com/JormungandrK/microservice-tools && \
+	go get -u github.com/JormungandrK/microservice-security
 
 COPY . /go/src/github.com/JormungandrK/microservice-schema-management
 RUN go install github.com/JormungandrK/microservice-schema-management

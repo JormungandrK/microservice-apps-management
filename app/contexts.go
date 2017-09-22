@@ -16,6 +16,57 @@ import (
 	"net/http"
 )
 
+// DeleteAppAppsContext provides the apps deleteApp action context.
+type DeleteAppAppsContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	AppID string
+}
+
+// NewDeleteAppAppsContext parses the incoming request URL and body, performs validations and creates the
+// context used by the apps controller deleteApp action.
+func NewDeleteAppAppsContext(ctx context.Context, r *http.Request, service *goa.Service) (*DeleteAppAppsContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := DeleteAppAppsContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramAppID := req.Params["appId"]
+	if len(paramAppID) > 0 {
+		rawAppID := paramAppID[0]
+		rctx.AppID = rawAppID
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *DeleteAppAppsContext) OK(resp []byte) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	ctx.ResponseData.WriteHeader(200)
+	_, err := ctx.ResponseData.Write(resp)
+	return err
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *DeleteAppAppsContext) BadRequest(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *DeleteAppAppsContext) NotFound(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 404, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *DeleteAppAppsContext) InternalServerError(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 500, r)
+}
+
 // GetAppsContext provides the apps get action context.
 type GetAppsContext struct {
 	context.Context
@@ -155,6 +206,57 @@ func (ctx *GetUserAppsAppsContext) InternalServerError(r error) error {
 	return ctx.ResponseData.Service.Send(ctx.Context, 500, r)
 }
 
+// RegenerateClientSecretAppsContext provides the apps regenerateClientSecret action context.
+type RegenerateClientSecretAppsContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	AppID string
+}
+
+// NewRegenerateClientSecretAppsContext parses the incoming request URL and body, performs validations and creates the
+// context used by the apps controller regenerateClientSecret action.
+func NewRegenerateClientSecretAppsContext(ctx context.Context, r *http.Request, service *goa.Service) (*RegenerateClientSecretAppsContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := RegenerateClientSecretAppsContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramAppID := req.Params["appId"]
+	if len(paramAppID) > 0 {
+		rawAppID := paramAppID[0]
+		rctx.AppID = rawAppID
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *RegenerateClientSecretAppsContext) OK(resp []byte) error {
+	ctx.ResponseData.Header().Set("Content-Type", "text/plain")
+	ctx.ResponseData.WriteHeader(200)
+	_, err := ctx.ResponseData.Write(resp)
+	return err
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *RegenerateClientSecretAppsContext) BadRequest(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *RegenerateClientSecretAppsContext) NotFound(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 404, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *RegenerateClientSecretAppsContext) InternalServerError(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 500, r)
+}
+
 // RegisterAppAppsContext provides the apps registerApp action context.
 type RegisterAppAppsContext struct {
 	context.Context
@@ -189,6 +291,56 @@ func (ctx *RegisterAppAppsContext) BadRequest(r error) error {
 
 // InternalServerError sends a HTTP response with status code 500.
 func (ctx *RegisterAppAppsContext) InternalServerError(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 500, r)
+}
+
+// UpdateAppAppsContext provides the apps updateApp action context.
+type UpdateAppAppsContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	AppID   string
+	Payload *AppPayload
+}
+
+// NewUpdateAppAppsContext parses the incoming request URL and body, performs validations and creates the
+// context used by the apps controller updateApp action.
+func NewUpdateAppAppsContext(ctx context.Context, r *http.Request, service *goa.Service) (*UpdateAppAppsContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := UpdateAppAppsContext{Context: ctx, ResponseData: resp, RequestData: req}
+	paramAppID := req.Params["appId"]
+	if len(paramAppID) > 0 {
+		rawAppID := paramAppID[0]
+		rctx.AppID = rawAppID
+	}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *UpdateAppAppsContext) OK(r *Apps) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.apps+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// BadRequest sends a HTTP response with status code 400.
+func (ctx *UpdateAppAppsContext) BadRequest(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *UpdateAppAppsContext) NotFound(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 404, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *UpdateAppAppsContext) InternalServerError(r error) error {
 	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
 	return ctx.ResponseData.Service.Send(ctx.Context, 500, r)
 }

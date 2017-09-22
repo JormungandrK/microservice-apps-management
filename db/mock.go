@@ -86,3 +86,22 @@ func (db *DB) GetUserApps(userID string) ([]byte, error) {
 
 	return res, nil
 }
+
+func (db *DB) RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error) {
+	if userID == "internal-error" {
+		return nil, goa.ErrInternal("inertnal-server-error")
+	}
+	if userID == "bad-request-error" {
+		return nil, goa.ErrBadRequest("invalid user ID")
+	}
+
+	db.apps["qwe5c461f9f8ebrtaae05zzz"] = payload
+
+	client := &app.RegApps{
+		ID:     "5975c461f9f8eb02aae053f3",
+		Secret: "some-secret",
+	}
+
+	return client, nil
+
+}

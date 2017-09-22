@@ -34,16 +34,34 @@ func initService(service *goa.Service) {
 // AppsController is the controller interface for the Apps actions.
 type AppsController interface {
 	goa.Muxer
+	DeleteApp(*DeleteAppAppsContext) error
 	Get(*GetAppsContext) error
 	GetMyApps(*GetMyAppsAppsContext) error
 	GetUserApps(*GetUserAppsAppsContext) error
+	RegenerateClientSecret(*RegenerateClientSecretAppsContext) error
 	RegisterApp(*RegisterAppAppsContext) error
+	UpdateApp(*UpdateAppAppsContext) error
 }
 
 // MountAppsController "mounts" a Apps resource controller on the given service.
 func MountAppsController(service *goa.Service, ctrl AppsController) {
 	initService(service)
 	var h goa.Handler
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewDeleteAppAppsContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.DeleteApp(rctx)
+	}
+	service.Mux.Handle("DELETE", "/apps/:appId", ctrl.MuxHandler("deleteApp", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "DeleteApp", "route", "DELETE /apps/:appId")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -96,6 +114,21 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 			return err
 		}
 		// Build the context
+		rctx, err := NewRegenerateClientSecretAppsContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		return ctrl.RegenerateClientSecret(rctx)
+	}
+	service.Mux.Handle("PUT", "/apps/:appId/regenerate-secret", ctrl.MuxHandler("regenerateClientSecret", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "RegenerateClientSecret", "route", "PUT /apps/:appId/regenerate-secret")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
 		rctx, err := NewRegisterAppAppsContext(ctx, req, service)
 		if err != nil {
 			return err
@@ -110,10 +143,46 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 	}
 	service.Mux.Handle("POST", "/apps", ctrl.MuxHandler("registerApp", h, unmarshalRegisterAppAppsPayload))
 	service.LogInfo("mount", "ctrl", "Apps", "action", "RegisterApp", "route", "POST /apps")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewUpdateAppAppsContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*AppPayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.UpdateApp(rctx)
+	}
+	service.Mux.Handle("PUT", "/apps/:appId", ctrl.MuxHandler("updateApp", h, unmarshalUpdateAppAppsPayload))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "UpdateApp", "route", "PUT /apps/:appId")
 }
 
 // unmarshalRegisterAppAppsPayload unmarshals the request body into the context request data Payload field.
 func unmarshalRegisterAppAppsPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &appPayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
+// unmarshalUpdateAppAppsPayload unmarshals the request body into the context request data Payload field.
+func unmarshalUpdateAppAppsPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
 	payload := &appPayload{}
 	if err := service.DecodeRequest(req, payload); err != nil {
 		return err
