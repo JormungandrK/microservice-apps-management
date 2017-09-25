@@ -54,7 +54,7 @@ func (c *AppsController) GetMyApps(ctx *app.GetMyAppsAppsContext) error {
 
 	userID := authObj.UserID
 
-	res, err := c.Repository.GetUserApps(userID)
+	res, err := c.Repository.GetMyApps(userID)
 
 	if err != nil {
 		e := err.(*goa.ErrorResponse)
@@ -78,8 +78,6 @@ func (c *AppsController) GetUserApps(ctx *app.GetUserAppsAppsContext) error {
 		e := err.(*goa.ErrorResponse)
 
 		switch e.Status {
-		case 400:
-			return ctx.BadRequest(err)
 		case 404:
 			return ctx.NotFound(err)
 		default:

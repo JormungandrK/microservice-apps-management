@@ -47,7 +47,6 @@ var _ = Resource("apps", func() {
 		})
 		Response(OK)
 		Response(NotFound, ErrorMedia)
-		Response(BadRequest, ErrorMedia)
 		Response(InternalServerError, ErrorMedia)
 	})
 

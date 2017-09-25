@@ -188,12 +188,6 @@ func (ctx *GetUserAppsAppsContext) OK(resp []byte) error {
 	return err
 }
 
-// BadRequest sends a HTTP response with status code 400.
-func (ctx *GetUserAppsAppsContext) BadRequest(r error) error {
-	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
-	return ctx.ResponseData.Service.Send(ctx.Context, 400, r)
-}
-
 // NotFound sends a HTTP response with status code 404.
 func (ctx *GetUserAppsAppsContext) NotFound(r error) error {
 	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")

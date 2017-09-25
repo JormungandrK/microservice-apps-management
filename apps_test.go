@@ -89,10 +89,6 @@ func TestGetUserAppsAppsInternalServerError(t *testing.T) {
 	test.GetUserAppsAppsInternalServerError(t, ctx, service, ctrl, errInternalID)
 }
 
-func TestGetUserAppsAppsBadRequest(t *testing.T) {
-	test.GetUserAppsAppsBadRequest(t, ctx, service, ctrl, badReqID)
-}
-
 func TestRegisterAppAppsCreated(t *testing.T) {
 	authObj := &auth.Auth{UserID: ID}
 	ctx = auth.SetAuth(ctx, authObj)
@@ -109,4 +105,52 @@ func TestRegisterAppAppsInternalServerError(t *testing.T) {
 	authObj := &auth.Auth{UserID: errInternalID}
 	ctx = auth.SetAuth(ctx, authObj)
 	test.RegisterAppAppsInternalServerError(t, ctx, service, ctrl, client)
+}
+
+func TestUpdateAppAppsOK(t *testing.T) {
+	test.UpdateAppAppsOK(t, ctx, service, ctrl, ID, client)
+}
+
+func TestUpdateAppAppsNotFound(t *testing.T) {
+	test.UpdateAppAppsNotFound(t, ctx, service, ctrl, notFoundID, client)
+}
+
+func TestUpdateAppAppsInternalServerError(t *testing.T) {
+	test.UpdateAppAppsInternalServerError(t, ctx, service, ctrl, errInternalID, client)
+}
+
+func TestUpdateAppAppsBadRequest(t *testing.T) {
+	test.UpdateAppAppsBadRequest(t, ctx, service, ctrl, badReqID, client)
+}
+
+func TestRegenerateClientSecretAppsOK(t *testing.T) {
+	test.RegenerateClientSecretAppsOK(t, ctx, service, ctrl, ID)
+}
+
+func TestRegenerateClientSecretAppsNotFound(t *testing.T) {
+	test.RegenerateClientSecretAppsNotFound(t, ctx, service, ctrl, notFoundID)
+}
+
+func TestRegenerateClientSecretAppsInternalServerError(t *testing.T) {
+	test.RegenerateClientSecretAppsInternalServerError(t, ctx, service, ctrl, errInternalID)
+}
+
+func TestRegenerateClientSecretAppsBadRequest(t *testing.T) {
+	test.RegenerateClientSecretAppsBadRequest(t, ctx, service, ctrl, badReqID)
+}
+
+func TestDeleteAppAppsOK(t *testing.T) {
+	test.DeleteAppAppsOK(t, ctx, service, ctrl, ID)
+}
+
+func TestDeleteAppAppsNotFound(t *testing.T) {
+	test.DeleteAppAppsNotFound(t, ctx, service, ctrl, notFoundID)
+}
+
+func TestDeleteAppAppsInternalServerError(t *testing.T) {
+	test.DeleteAppAppsInternalServerError(t, ctx, service, ctrl, errInternalID)
+}
+
+func TestDeleteAppAppsBadRequest(t *testing.T) {
+	test.DeleteAppAppsBadRequest(t, ctx, service, ctrl, badReqID)
 }

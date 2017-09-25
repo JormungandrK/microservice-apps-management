@@ -36,8 +36,8 @@ func main() {
 	defer session.Close()
 
 	// Create apps collection and indexes
-	index1 := []string{"name", "domain"}
-	index2 := []string{"domain"}
+	index1 := []string{"domain"}
+	index2 := []string{"name"}
 	indexes := [][]string{index1, index2}
 	collectionName := "apps"
 	collection := db.PrepareDB(session, database, collectionName, indexes)

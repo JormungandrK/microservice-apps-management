@@ -2,6 +2,7 @@ package db
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"time"
 
@@ -11,14 +12,13 @@ import (
 	"github.com/JormungandrK/microservice-apps-management/app"
 	"github.com/asaskevich/govalidator"
 	"github.com/goadesign/goa"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 // AppRepository defaines the interface for accessing the application data.
 type AppRepository interface {
 	// GetApp looks up a applications by the app ID.
 	GetApp(appID string) (*app.Apps, error)
+	GetMyApps(userID string) ([]byte, error)
 	GetUserApps(userID string) ([]byte, error)
 	RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error)
 	DeleteApp(appID string) error
@@ -84,23 +84,44 @@ func (c *MongoCollection) GetApp(appID string) (*app.Apps, error) {
 	res := &app.Apps{}
 	if err := c.FindId(objectID).One(&res); err != nil {
 		if err.Error() == "not found" {
-			return nil, goa.ErrNotFound(err)
+			return nil, goa.ErrNotFound("app not found.")
 		} else {
 			return nil, goa.ErrInternal(err)
 		}
+	}
+
+	res.ID = appID
+
+	return res, nil
+}
+
+func (c *MongoCollection) GetMyApps(userID string) ([]byte, error) {
+	var apps []map[string]interface{}
+	if err := c.Find(bson.M{"owner": userID}).Sort("registeredat").All(&apps); err != nil {
+		return nil, goa.ErrInternal(err)
+	}
+
+	if len(apps) == 0 {
+		return nil, goa.ErrNotFound("no apps found!")
+	}
+
+	for _, client := range apps {
+		client["id"] = client["_id"]
+		delete(client, "_id")
+		delete(client, "secret")
+	}
+
+	res, err := json.Marshal(apps)
+	if err != nil {
+		return nil, goa.ErrInternal(err)
 	}
 
 	return res, nil
 }
 
 func (c *MongoCollection) GetUserApps(userID string) ([]byte, error) {
-	objectID, err := hexToObjectID(userID)
-	if err != nil {
-		return nil, err
-	}
-
 	var apps []map[string]interface{}
-	if err := c.Find(bson.M{"owner": objectID}).Sort("registeredat").All(&apps); err != nil {
+	if err := c.Find(bson.M{"owner": userID}).Sort("registeredat").All(&apps); err != nil {
 		return nil, goa.ErrInternal(err)
 	}
 
@@ -124,11 +145,7 @@ func (c *MongoCollection) GetUserApps(userID string) ([]byte, error) {
 func (c *MongoCollection) RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error) {
 	appID := bson.NewObjectIdWithTime(time.Now())
 	registeredAt := int(time.Now().Unix())
-	b, err := generateSecret(42)
-	if err != nil {
-		return nil, goa.ErrInternal(err)
-	}
-	secret, err := hashSecret(b)
+	secret, err := GenerateRandomString(42)
 	if err != nil {
 		return nil, goa.ErrInternal(err)
 	}
@@ -155,7 +172,7 @@ func (c *MongoCollection) RegisterApp(payload *app.AppPayload, userID string) (*
 
 	res := &app.RegApps{
 		ID:     appID.Hex(),
-		Secret: string(b),
+		Secret: secret,
 	}
 
 	return res, nil
@@ -186,7 +203,7 @@ func (c *MongoCollection) UpdateApp(payload *app.AppPayload, appID string) (*app
 	}
 
 	err = c.Update(
-		bson.M{"id": objectID},
+		bson.M{"_id": objectID},
 		bson.M{"$set": bson.M{
 			"name":        payload.Name,
 			"description": payload.Description,
@@ -196,7 +213,7 @@ func (c *MongoCollection) UpdateApp(payload *app.AppPayload, appID string) (*app
 
 	if err != nil {
 		if err.Error() == "not found" {
-			return nil, goa.ErrNotFound(err)
+			return nil, goa.ErrNotFound("application not found.")
 		} else {
 			return nil, goa.ErrInternal(err)
 		}
@@ -206,6 +223,7 @@ func (c *MongoCollection) UpdateApp(payload *app.AppPayload, appID string) (*app
 	if err != nil {
 		return nil, err
 	}
+	client.ID = appID
 
 	return client, nil
 }
@@ -216,17 +234,13 @@ func (c *MongoCollection) RegenerateSecret(appID string) ([]byte, error) {
 		return nil, err
 	}
 
-	b, err := generateSecret(42)
-	if err != nil {
-		return nil, goa.ErrInternal(err)
-	}
-	secret, err := hashSecret(b)
+	secret, err := GenerateRandomString(42)
 	if err != nil {
 		return nil, goa.ErrInternal(err)
 	}
 
 	err = c.Update(
-		bson.M{"id": objectID},
+		bson.M{"_id": objectID},
 		bson.M{"$set": bson.M{
 			"secret": secret,
 		},
@@ -234,7 +248,7 @@ func (c *MongoCollection) RegenerateSecret(appID string) ([]byte, error) {
 
 	if err != nil {
 		if err.Error() == "not found" {
-			return nil, goa.ErrNotFound(err)
+			return nil, goa.ErrNotFound("application not found")
 		} else {
 			return nil, goa.ErrInternal(err)
 		}
@@ -246,6 +260,7 @@ func (c *MongoCollection) RegenerateSecret(appID string) ([]byte, error) {
 	}
 
 	client["id"] = client["_id"]
+	client["secret"] = secret
 	delete(client, "_id")
 
 	res, err := json.Marshal(client)
@@ -274,27 +289,28 @@ func hexToObjectID(hexID string) (bson.ObjectId, error) {
 	return objectID, nil
 }
 
-// generateSecret generates n random bytes.
-func generateSecret(n int) ([]byte, error) {
+// GenerateRandomBytes returns securely generated random bytes.
+// It will return an error if the system's secure random number generator fails to
+// function correctly, in which case the caller should not continue.
+func GenerateRandomBytes(n int) ([]byte, error) {
 	b := make([]byte, n)
-	if _, err := rand.Read(b); err != nil {
+	_, err := rand.Read(b)
+	if err != nil {
 		return nil, err
 	}
 
 	return b, nil
 }
 
-// hashSecret returns the bcrypt hash of the secret at the given cost.
-func hashSecret(b []byte) (string, error) {
-	hashedSecret, err := bcrypt.GenerateFromPassword(b, bcrypt.DefaultCost)
-	if err != nil {
-		return "", goa.ErrInternal(err)
-	}
-
-	secret := string(hashedSecret)
-	return secret, nil
+// GenerateRandomString returns a URL-safe, base64 encoded securely generated random string.
+// It will return an error if the system's secure random number generator fails to
+// function correctly, in which case the caller should not continue.
+func GenerateRandomString(s int) (string, error) {
+	b, err := GenerateRandomBytes(s)
+	return base64.URLEncoding.EncodeToString(b), err
 }
 
+// Validate domain
 func validateDomain(domain string) error {
 	if ok := govalidator.IsURL(domain); !ok {
 		return goa.ErrBadRequest("invalid domain name")
