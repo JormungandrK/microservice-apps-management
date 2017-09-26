@@ -15,18 +15,18 @@ RUN go get -u github.com/goadesign/goa/... && \
 RUN go get -u github.com/JormungandrK/microservice-tools && \
 	go get -u github.com/JormungandrK/microservice-security
 
-COPY . /go/src/github.com/JormungandrK/microservice-schema-management
-RUN go install github.com/JormungandrK/microservice-schema-management
+COPY . /go/src/github.com/JormungandrK/microservice-apps-management
+RUN go install github.com/JormungandrK/microservice-apps-management
 
 
 ### Main
 FROM alpine:3.6
 
-COPY --from=build /go/bin/microservice-schema-management /usr/local/bin/microservice-schema-management
+COPY --from=build /go/bin/microservice-apps-management /usr/local/bin/microservice-apps-management
 COPY config.json /config.json
 EXPOSE 8080
 
 ENV SERVICE_CONFIG_FILE="config.json"
 ENV API_GATEWAY_URL="http://localhost:8001"
 
-CMD ["/usr/local/bin/microservice-schema-management"]
+CMD ["/usr/local/bin/microservice-apps-management"]
