@@ -1,8 +1,36 @@
 {
-  "name": "apps-management-microservice",
-  "port": 8080,
-  "virtual_host": "apps-management.services.jormugandr.org",
-  "hosts": ["localhost", "apps-management.services.jormugandr.org"],
-  "weight": 10,
-  "slots": 100
+  "service":{
+    "name": "apps-management-microservice",
+    "port": 8080,
+    "virtual_host": "apps-management.services.jormugandr.org",
+    "hosts": ["localhost", "apps-management.services.jormugandr.org"],
+    "weight": 10,
+    "slots": 100
+  },
+  "gatewayUrl": "http://localhost:8000",
+  "security":{
+    "keysDir": "keys",
+    "jwt":{
+      "description": "JWT security middleware",
+      "tokenUrl": "http://localhost:8000/jwt/signin"
+    },
+    "saml":{
+      "certFile": "keys/default.cert",
+      "keyFile": "keys/default",
+      "identityProviderUrl": "http://localhost:8000/saml/idp",
+      "userServiceUrl": "http://localhost:8000/user",
+      "registrationServiceUrl": "http://localhost:8000/user/register"
+    },
+    "oauth2":{
+      "description": "OAuth2 security middleware",
+      "tokenUrl": "https://localhost:8000/oauth2/token",
+      "authorizeUrl": "https://localhost:8000/oauth2/authorize"
+    }
+  },
+  "database":{
+    "host": "127.0.0.1:27017",
+    "database": "apps-management",
+    "user": "restapi",
+    "pass": "restapi"
+  }
 }
