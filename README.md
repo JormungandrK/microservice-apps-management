@@ -1,4 +1,9 @@
 # microservice-apps-management
+
+[![Build](https://travis-ci.com/JormungandrK/microservice-apps-management.svg?token=UB5yzsLHNSbtjSYrGbWf&branch=master)](https://travis-ci.com/JormungandrK/microservice-apps-management)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/84383c8e579c181760ed/test_coverage)](https://codeclimate.com/repos/59c2524fbed4f6028e000bb6/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/84383c8e579c181760ed/maintainability)](https://codeclimate.com/repos/59c2524fbed4f6028e000bb6/maintainability)
+
 Microservice Apps Management
 
 ## Prerequisite
@@ -191,5 +196,3 @@ Configuration properties:
  * **hosts** - list of valid hosts. Used for proxying and load balancing of the incoming request. You need to have at least the **virtual_host** in the list.
  * **weight** - instance weight - use for load balancing.
  * **slots** - maximal number of service instances under ```"apps-management.services.jormugandr.org"```.
-
-
