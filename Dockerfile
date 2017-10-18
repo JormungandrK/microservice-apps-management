@@ -13,7 +13,7 @@ RUN go get -u github.com/goadesign/goa/... && \
     go get -u gopkg.in/mgo.v2
 
 RUN go get -u github.com/JormungandrK/microservice-tools && \
-	go get -u github.com/JormungandrK/microservice-security
+	go get -u github.com/JormungandrK/microservice-security/...
 
 COPY . /go/src/github.com/JormungandrK/microservice-apps-management
 RUN go install github.com/JormungandrK/microservice-apps-management
