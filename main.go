@@ -18,13 +18,18 @@ import (
 )
 
 func main() {
+	// Create service
+	service := goa.New("apps-management")
+
 	// Load configuration
 	gatewayAdminURL, configFile := loadGatewaySettings()
 
 	conf, err := config.LoadConfig(configFile)
 	if err != nil {
-		panic(err)
+		service.LogError("config", "err", err)
+		return
 	}
+
 	// Gateway self-registration
 	unregisterService := registerMicroservice(gatewayAdminURL, conf)
 	defer unregisterService() // defer the unregister for after main exits
@@ -35,8 +40,6 @@ func main() {
 		panic(err)
 	}
 	defer cleanup()
-	// Create service
-	service := goa.New("apps-management")
 
 	// Mount middleware
 	service.Use(middleware.RequestID())
@@ -82,7 +85,7 @@ func loadGatewaySettings() (string, string) {
 		gatewayURL = "http://localhost:8001"
 	}
 	if serviceConfigFile == "" {
-		serviceConfigFile = "config.json"
+		serviceConfigFile = "/run/secrets/microservice_apps_management_config.json"
 	}
 
 	return gatewayURL, serviceConfigFile

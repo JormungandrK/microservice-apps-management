@@ -23,10 +23,8 @@ RUN go install github.com/JormungandrK/microservice-apps-management
 FROM alpine:3.6
 
 COPY --from=build /go/bin/microservice-apps-management /usr/local/bin/microservice-apps-management
-COPY config.json /config.json
 EXPOSE 8080
 
-ENV SERVICE_CONFIG_FILE="config.json"
 ENV API_GATEWAY_URL="http://localhost:8001"
 
 CMD ["/usr/local/bin/microservice-apps-management"]
