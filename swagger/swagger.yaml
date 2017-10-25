@@ -137,7 +137,7 @@ info:
   title: The apps management microservice
   version: "1.0"
 paths:
-  /apps:
+  /:
     post:
       description: Register new app
       operationId: apps#registerApp
@@ -151,6 +151,7 @@ paths:
       produces:
       - application/vnd.goa.error
       - application/vnd.goa.reg.apps+json
+      - application/vnd.goa.error
       responses:
         "201":
           description: Created
@@ -169,7 +170,7 @@ paths:
       summary: registerApp apps
       tags:
       - apps
-  /apps/{appId}:
+  /{appId}:
     delete:
       description: Delete an app
       operationId: apps#deleteApp
@@ -179,6 +180,8 @@ paths:
         required: true
         type: string
       produces:
+      - application/vnd.goa.error
+      - application/vnd.goa.error
       - application/vnd.goa.error
       - text/plain
       responses:
@@ -211,8 +214,10 @@ paths:
         required: true
         type: string
       produces:
-      - application/vnd.goa.apps+json
       - application/vnd.goa.error
+      - application/vnd.goa.error
+      - application/vnd.goa.error
+      - application/vnd.goa.apps+json
       responses:
         "200":
           description: OK
@@ -250,8 +255,10 @@ paths:
         schema:
           $ref: '#/definitions/AppPayload'
       produces:
-      - application/vnd.goa.apps+json
       - application/vnd.goa.error
+      - application/vnd.goa.error
+      - application/vnd.goa.error
+      - application/vnd.goa.apps+json
       responses:
         "200":
           description: OK
@@ -274,7 +281,7 @@ paths:
       summary: updateApp apps
       tags:
       - apps
-  /apps/{appId}/regenerate-secret:
+  /{appId}/regenerate-secret:
     put:
       description: Regenerate client secret
       operationId: apps#regenerateClientSecret
@@ -284,6 +291,8 @@ paths:
         required: true
         type: string
       produces:
+      - application/vnd.goa.error
+      - application/vnd.goa.error
       - application/vnd.goa.error
       - text/plain
       responses:
@@ -306,11 +315,12 @@ paths:
       summary: regenerateClientSecret apps
       tags:
       - apps
-  /apps/my:
+  /my:
     get:
       description: Get all user's apps
       operationId: apps#getMyApps
       produces:
+      - application/vnd.goa.error
       - application/vnd.goa.error
       - text/plain
       responses:
@@ -327,35 +337,6 @@ paths:
       schemes:
       - http
       summary: getMyApps apps
-      tags:
-      - apps
-  /apps/users/{userId}/all:
-    get:
-      description: Get app by id
-      operationId: apps#getUserApps
-      parameters:
-      - description: User ID
-        in: path
-        name: userId
-        required: true
-        type: string
-      produces:
-      - application/vnd.goa.error
-      - text/plain
-      responses:
-        "200":
-          description: OK
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/error'
-      schemes:
-      - http
-      summary: getUserApps apps
       tags:
       - apps
   /swagger-ui/{filepath}:
@@ -390,6 +371,36 @@ paths:
       schemes:
       - http
       summary: Download swagger/swagger.json
+  /users/{userId}/all:
+    get:
+      description: Get app by id
+      operationId: apps#getUserApps
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/vnd.goa.error
+      - application/vnd.goa.error
+      - text/plain
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/error'
+      schemes:
+      - http
+      summary: getUserApps apps
+      tags:
+      - apps
 produces:
 - application/json
 - application/xml
