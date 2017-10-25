@@ -60,8 +60,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		}
 		return ctrl.DeleteApp(rctx)
 	}
-	service.Mux.Handle("DELETE", "/:appId", ctrl.MuxHandler("deleteApp", h, nil))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "DeleteApp", "route", "DELETE /:appId")
+	service.Mux.Handle("DELETE", "/apps/:appId", ctrl.MuxHandler("deleteApp", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "DeleteApp", "route", "DELETE /apps/:appId")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -75,8 +75,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		}
 		return ctrl.Get(rctx)
 	}
-	service.Mux.Handle("GET", "/:appId", ctrl.MuxHandler("get", h, nil))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "Get", "route", "GET /:appId")
+	service.Mux.Handle("GET", "/apps/:appId", ctrl.MuxHandler("get", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "Get", "route", "GET /apps/:appId")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -90,8 +90,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		}
 		return ctrl.GetMyApps(rctx)
 	}
-	service.Mux.Handle("GET", "/my", ctrl.MuxHandler("getMyApps", h, nil))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "GetMyApps", "route", "GET /my")
+	service.Mux.Handle("GET", "/apps/my", ctrl.MuxHandler("getMyApps", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "GetMyApps", "route", "GET /apps/my")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -105,8 +105,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		}
 		return ctrl.GetUserApps(rctx)
 	}
-	service.Mux.Handle("GET", "/users/:userId/all", ctrl.MuxHandler("getUserApps", h, nil))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "GetUserApps", "route", "GET /users/:userId/all")
+	service.Mux.Handle("GET", "/apps/users/:userId/all", ctrl.MuxHandler("getUserApps", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "GetUserApps", "route", "GET /apps/users/:userId/all")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -120,8 +120,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		}
 		return ctrl.RegenerateClientSecret(rctx)
 	}
-	service.Mux.Handle("PUT", "/:appId/regenerate-secret", ctrl.MuxHandler("regenerateClientSecret", h, nil))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "RegenerateClientSecret", "route", "PUT /:appId/regenerate-secret")
+	service.Mux.Handle("PUT", "/apps/:appId/regenerate-secret", ctrl.MuxHandler("regenerateClientSecret", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "RegenerateClientSecret", "route", "PUT /apps/:appId/regenerate-secret")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -141,8 +141,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		}
 		return ctrl.RegisterApp(rctx)
 	}
-	service.Mux.Handle("POST", "/", ctrl.MuxHandler("registerApp", h, unmarshalRegisterAppAppsPayload))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "RegisterApp", "route", "POST /")
+	service.Mux.Handle("POST", "/apps", ctrl.MuxHandler("registerApp", h, unmarshalRegisterAppAppsPayload))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "RegisterApp", "route", "POST /apps")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -162,8 +162,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		}
 		return ctrl.UpdateApp(rctx)
 	}
-	service.Mux.Handle("PUT", "/:appId", ctrl.MuxHandler("updateApp", h, unmarshalUpdateAppAppsPayload))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "UpdateApp", "route", "PUT /:appId")
+	service.Mux.Handle("PUT", "/apps/:appId", ctrl.MuxHandler("updateApp", h, unmarshalUpdateAppAppsPayload))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "UpdateApp", "route", "PUT /apps/:appId")
 }
 
 // unmarshalRegisterAppAppsPayload unmarshals the request body into the context request data Payload field.

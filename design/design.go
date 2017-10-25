@@ -17,7 +17,7 @@ var _ = API("apps-management", func() {
 
 // Resources group related API endpoints together.
 var _ = Resource("apps", func() {
-	BasePath("")
+	BasePath("/apps")
 
 	Action("get", func() {
 		Description("Get app by id")
