@@ -2,8 +2,8 @@
   "service":{
     "name": "apps-management-microservice",
     "port": 8080,
+    "paths":["/apps"],
     "virtual_host": "apps-management.services.jormugandr.org",
-    "hosts": ["localhost", "apps-management.services.jormugandr.org"],
     "weight": 10,
     "slots": 100
   },
