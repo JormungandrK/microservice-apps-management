@@ -143,7 +143,7 @@ func (c *MongoCollection) GetUserApps(userID string) ([]byte, error) {
 }
 
 func (c *MongoCollection) RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error) {
-	appID := bson.NewObjectIdWithTime(time.Now())
+	appID := bson.NewObjectId()
 	registeredAt := int(time.Now().Unix())
 	secret, err := GenerateRandomString(42)
 	if err != nil {
