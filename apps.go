@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/JormungandrK/microservice-apps-management/app"
 	"github.com/JormungandrK/microservice-apps-management/db"
 	"github.com/JormungandrK/microservice-security/auth"
@@ -174,4 +176,23 @@ func (c *AppsController) RegenerateClientSecret(ctx *app.RegenerateClientSecretA
 	}
 
 	return ctx.OK(res)
+}
+
+func (c *AppsController) VerifyApp(ctx *app.VerifyAppAppsContext) error {
+	clientApp, err := c.Repository.FindApp(ctx.Payload.ID, ctx.Payload.Secret)
+	if err != nil {
+		return ctx.InternalServerError(err)
+	}
+	if clientApp == nil {
+		return ctx.NotFound(fmt.Errorf("not-found"))
+	}
+
+	return ctx.OK(&app.Apps{
+		ID:           clientApp.ID,
+		Description:  clientApp.Description,
+		Domain:       clientApp.Domain,
+		Name:         clientApp.Name,
+		Owner:        clientApp.Owner,
+		RegisteredAt: int(clientApp.RegisteredAt),
+	})
 }

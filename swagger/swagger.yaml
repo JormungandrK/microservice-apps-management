@@ -4,6 +4,25 @@ consumes:
 - application/gob
 - application/x-gob
 definitions:
+  AppCredentialsPayload:
+    description: App ID+secret credentials
+    example:
+      id: Itaque magnam consequatur doloribus.
+      secret: Inventore est.
+    properties:
+      id:
+        description: The app ID
+        example: Itaque magnam consequatur doloribus.
+        type: string
+      secret:
+        description: The app secret
+        example: Inventore est.
+        type: string
+    required:
+    - id
+    - secret
+    title: AppCredentialsPayload
+    type: object
   AppPayload:
     description: Payload for the client apps
     example:
@@ -367,6 +386,39 @@ paths:
       schemes:
       - http
       summary: getUserApps apps
+      tags:
+      - apps
+  /apps/verify:
+    post:
+      description: Verify an application by its ID and secret
+      operationId: apps#verifyApp
+      parameters:
+      - description: App ID+secret credentials
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/AppCredentialsPayload'
+      produces:
+      - application/vnd.goa.error
+      - application/vnd.goa.error
+      - application/vnd.goa.apps+json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apps'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/error'
+      schemes:
+      - http
+      summary: verifyApp apps
       tags:
       - apps
   /swagger-ui/{filepath}:

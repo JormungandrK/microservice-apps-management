@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"gopkg.in/mgo.v2"
@@ -24,6 +25,17 @@ type AppRepository interface {
 	DeleteApp(appID string) error
 	UpdateApp(payload *app.AppPayload, appID string) (*app.Apps, error)
 	RegenerateSecret(appID string) ([]byte, error)
+	FindApp(id, secret string) (*ClientApp, error)
+}
+
+type ClientApp struct {
+	ID           string `json:"id" bson:"_id"`
+	Name         string `json:"name" bson:"name"`
+	Description  string `json:"description,omitempty" bson:"description"`
+	Domain       string `json:"domain,omitempty" bson:"domain"`
+	Owner        string `json:"owner" bson:"owner"`
+	RegisteredAt int64  `json:"registeredAt" bson:"registeredAt"`
+	Secret       string `json:"secret" bson:"secret"`
 }
 
 // MongoCollection wraps a mgo.Collection to embed methods in models.
@@ -269,6 +281,30 @@ func (c *MongoCollection) RegenerateSecret(appID string) ([]byte, error) {
 	}
 
 	return res, nil
+}
+
+func (c *MongoCollection) FindApp(ID, secret string) (*ClientApp, error) {
+	fmt.Println("Find APP")
+	objectID, err := hexToObjectID(ID)
+	if err != nil {
+		return nil, err
+	}
+	ca := ClientApp{}
+	err = c.FindId(objectID).One(&ca)
+	if err != nil {
+		fmt.Println("An error: ", err.Error())
+		if err.Error() == "not found" {
+			return nil, nil
+		}
+		return nil, err
+	}
+	fmt.Println("Secret from mongo: ", ca.Secret)
+	fmt.Println("Secret from   req: ", secret)
+	if ca.Secret == secret {
+
+		return &ca, nil
+	}
+	return nil, nil
 }
 
 // Convert hex representation of object id to bson object id
