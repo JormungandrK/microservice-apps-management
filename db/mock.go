@@ -213,3 +213,8 @@ func (db *DB) RegenerateSecret(appID string) ([]byte, error) {
 
 	return res, nil
 }
+
+// FindApp tries to find an app with the supplied app ID and secret.
+func (db *DB) FindApp(ID, secret string) (*ClientApp, error) {
+	return nil, nil
+}

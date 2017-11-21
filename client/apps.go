@@ -253,3 +253,46 @@ func (c *Client) NewUpdateAppAppsRequest(ctx context.Context, path string, paylo
 	}
 	return req, nil
 }
+
+// VerifyAppAppsPath computes a request path to the verifyApp action of apps.
+func VerifyAppAppsPath() string {
+
+	return fmt.Sprintf("/apps/verify")
+}
+
+// Verify an application by its ID and secret
+func (c *Client) VerifyAppApps(ctx context.Context, path string, payload *AppCredentialsPayload, contentType string) (*http.Response, error) {
+	req, err := c.NewVerifyAppAppsRequest(ctx, path, payload, contentType)
+	if err != nil {
+		return nil, err
+	}
+	return c.Client.Do(ctx, req)
+}
+
+// NewVerifyAppAppsRequest create the request corresponding to the verifyApp action endpoint of the apps resource.
+func (c *Client) NewVerifyAppAppsRequest(ctx context.Context, path string, payload *AppCredentialsPayload, contentType string) (*http.Request, error) {
+	var body bytes.Buffer
+	if contentType == "" {
+		contentType = "*/*" // Use default encoder
+	}
+	err := c.Encoder.Encode(payload, &body, contentType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode body: %s", err)
+	}
+	scheme := c.Scheme
+	if scheme == "" {
+		scheme = "http"
+	}
+	u := url.URL{Host: c.Host, Scheme: scheme, Path: path}
+	req, err := http.NewRequest("POST", u.String(), &body)
+	if err != nil {
+		return nil, err
+	}
+	header := req.Header
+	if contentType == "*/*" {
+		header.Set("Content-Type", "application/json")
+	} else {
+		header.Set("Content-Type", contentType)
+	}
+	return req, nil
+}

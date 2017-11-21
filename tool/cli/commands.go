@@ -75,6 +75,13 @@ type (
 		PrettyPrint bool
 	}
 
+	// VerifyAppAppsCommand is the command line data structure for the verifyApp action of apps
+	VerifyAppAppsCommand struct {
+		Payload     string
+		ContentType string
+		PrettyPrint bool
+	}
+
 	// DownloadCommand is the command line data structure for the download command.
 	DownloadCommand struct {
 		// OutFile is the path to the download output file.
@@ -199,6 +206,28 @@ Payload example:
 	}
 	tmp7.RegisterFlags(sub, c)
 	sub.PersistentFlags().BoolVar(&tmp7.PrettyPrint, "pp", false, "Pretty print response body")
+	command.AddCommand(sub)
+	app.AddCommand(command)
+	command = &cobra.Command{
+		Use:   "verify-app",
+		Short: `Verify an application by its ID and secret`,
+	}
+	tmp8 := new(VerifyAppAppsCommand)
+	sub = &cobra.Command{
+		Use:   `apps ["/apps/verify"]`,
+		Short: ``,
+		Long: `
+
+Payload example:
+
+{
+   "id": "Itaque magnam consequatur doloribus.",
+   "secret": "Inventore est."
+}`,
+		RunE: func(cmd *cobra.Command, args []string) error { return tmp8.Run(c, args) },
+	}
+	tmp8.RegisterFlags(sub, c)
+	sub.PersistentFlags().BoolVar(&tmp8.PrettyPrint, "pp", false, "Pretty print response body")
 	command.AddCommand(sub)
 	app.AddCommand(command)
 
@@ -608,4 +637,37 @@ func (cmd *UpdateAppAppsCommand) RegisterFlags(cc *cobra.Command, c *client.Clie
 	cc.Flags().StringVar(&cmd.ContentType, "content", "", "Request content type override, e.g. 'application/x-www-form-urlencoded'")
 	var appID string
 	cc.Flags().StringVar(&cmd.AppID, "appId", appID, ``)
+}
+
+// Run makes the HTTP request corresponding to the VerifyAppAppsCommand command.
+func (cmd *VerifyAppAppsCommand) Run(c *client.Client, args []string) error {
+	var path string
+	if len(args) > 0 {
+		path = args[0]
+	} else {
+		path = "/apps/verify"
+	}
+	var payload client.AppCredentialsPayload
+	if cmd.Payload != "" {
+		err := json.Unmarshal([]byte(cmd.Payload), &payload)
+		if err != nil {
+			return fmt.Errorf("failed to deserialize payload: %s", err)
+		}
+	}
+	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
+	ctx := goa.WithLogger(context.Background(), logger)
+	resp, err := c.VerifyAppApps(ctx, path, &payload, cmd.ContentType)
+	if err != nil {
+		goa.LogError(ctx, "failed", "err", err)
+		return err
+	}
+
+	goaclient.HandleResponse(c.Client, resp, cmd.PrettyPrint)
+	return nil
+}
+
+// RegisterFlags registers the command flags with the command line.
+func (cmd *VerifyAppAppsCommand) RegisterFlags(cc *cobra.Command, c *client.Client) {
+	cc.Flags().StringVar(&cmd.Payload, "payload", "", "Request body encoded in JSON")
+	cc.Flags().StringVar(&cmd.ContentType, "content", "", "Request content type override, e.g. 'application/x-www-form-urlencoded'")
 }

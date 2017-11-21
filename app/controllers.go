@@ -41,6 +41,7 @@ type AppsController interface {
 	RegenerateClientSecret(*RegenerateClientSecretAppsContext) error
 	RegisterApp(*RegisterAppAppsContext) error
 	UpdateApp(*UpdateAppAppsContext) error
+	VerifyApp(*VerifyAppAppsContext) error
 }
 
 // MountAppsController "mounts" a Apps resource controller on the given service.
@@ -164,6 +165,27 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 	}
 	service.Mux.Handle("PUT", "/apps/:appId", ctrl.MuxHandler("updateApp", h, unmarshalUpdateAppAppsPayload))
 	service.LogInfo("mount", "ctrl", "Apps", "action", "UpdateApp", "route", "PUT /apps/:appId")
+
+	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
+		// Check if there was an error loading the request
+		if err := goa.ContextError(ctx); err != nil {
+			return err
+		}
+		// Build the context
+		rctx, err := NewVerifyAppAppsContext(ctx, req, service)
+		if err != nil {
+			return err
+		}
+		// Build the payload
+		if rawPayload := goa.ContextRequest(ctx).Payload; rawPayload != nil {
+			rctx.Payload = rawPayload.(*AppCredentialsPayload)
+		} else {
+			return goa.MissingPayloadError()
+		}
+		return ctrl.VerifyApp(rctx)
+	}
+	service.Mux.Handle("POST", "/apps/verify", ctrl.MuxHandler("verifyApp", h, unmarshalVerifyAppAppsPayload))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "VerifyApp", "route", "POST /apps/verify")
 }
 
 // unmarshalRegisterAppAppsPayload unmarshals the request body into the context request data Payload field.
@@ -184,6 +206,21 @@ func unmarshalRegisterAppAppsPayload(ctx context.Context, service *goa.Service, 
 // unmarshalUpdateAppAppsPayload unmarshals the request body into the context request data Payload field.
 func unmarshalUpdateAppAppsPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
 	payload := &appPayload{}
+	if err := service.DecodeRequest(req, payload); err != nil {
+		return err
+	}
+	if err := payload.Validate(); err != nil {
+		// Initialize payload with private data structure so it can be logged
+		goa.ContextRequest(ctx).Payload = payload
+		return err
+	}
+	goa.ContextRequest(ctx).Payload = payload.Publicize()
+	return nil
+}
+
+// unmarshalVerifyAppAppsPayload unmarshals the request body into the context request data Payload field.
+func unmarshalVerifyAppAppsPayload(ctx context.Context, service *goa.Service, req *http.Request) error {
+	payload := &appCredentialsPayload{}
 	if err := service.DecodeRequest(req, payload); err != nil {
 		return err
 	}

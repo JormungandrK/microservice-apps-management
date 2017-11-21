@@ -338,3 +338,41 @@ func (ctx *UpdateAppAppsContext) InternalServerError(r error) error {
 	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
 	return ctx.ResponseData.Service.Send(ctx.Context, 500, r)
 }
+
+// VerifyAppAppsContext provides the apps verifyApp action context.
+type VerifyAppAppsContext struct {
+	context.Context
+	*goa.ResponseData
+	*goa.RequestData
+	Payload *AppCredentialsPayload
+}
+
+// NewVerifyAppAppsContext parses the incoming request URL and body, performs validations and creates the
+// context used by the apps controller verifyApp action.
+func NewVerifyAppAppsContext(ctx context.Context, r *http.Request, service *goa.Service) (*VerifyAppAppsContext, error) {
+	var err error
+	resp := goa.ContextResponse(ctx)
+	resp.Service = service
+	req := goa.ContextRequest(ctx)
+	req.Request = r
+	rctx := VerifyAppAppsContext{Context: ctx, ResponseData: resp, RequestData: req}
+	return &rctx, err
+}
+
+// OK sends a HTTP response with status code 200.
+func (ctx *VerifyAppAppsContext) OK(r *Apps) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.apps+json")
+	return ctx.ResponseData.Service.Send(ctx.Context, 200, r)
+}
+
+// NotFound sends a HTTP response with status code 404.
+func (ctx *VerifyAppAppsContext) NotFound(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 404, r)
+}
+
+// InternalServerError sends a HTTP response with status code 500.
+func (ctx *VerifyAppAppsContext) InternalServerError(r error) error {
+	ctx.ResponseData.Header().Set("Content-Type", "application/vnd.goa.error")
+	return ctx.ResponseData.Service.Send(ctx.Context, 500, r)
+}

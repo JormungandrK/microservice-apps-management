@@ -87,6 +87,14 @@ var _ = Resource("apps", func() {
 		Response(InternalServerError, ErrorMedia)
 	})
 
+	Action("verifyApp", func() {
+		Description("Verify an application by its ID and secret")
+		Routing(POST("/verify"))
+		Payload(AppCredentialsPayload)
+		Response(OK, AppMedia)
+		Response(NotFound, ErrorMedia)
+		Response(InternalServerError, ErrorMedia)
+	})
 })
 
 // AppMedia defines the media type used to render client apps.
@@ -144,6 +152,14 @@ var AppPayload = Type("AppPayload", func() {
 	Attribute("domain", String, "App domain")
 
 	Required("name")
+})
+
+// AppCredentialsPayload holds the app credentials: app ID and app secret.
+var AppCredentialsPayload = Type("AppCredentialsPayload", func() {
+	Description("App ID+secret credentials")
+	Attribute("id", String, "The app ID")
+	Attribute("secret", String, "The app secret")
+	Required("id", "secret")
 })
 
 // Swagger UI
