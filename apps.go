@@ -23,7 +23,7 @@ func NewAppsController(service *goa.Service, repository db.AppRepository) *AppsC
 	}
 }
 
-// Return an app by its ID.
+// Get returns an app by its ID.
 func (c *AppsController) Get(ctx *app.GetAppsContext) error {
 	res, err := c.Repository.GetApp(ctx.AppID)
 
@@ -43,7 +43,7 @@ func (c *AppsController) Get(ctx *app.GetAppsContext) error {
 	return ctx.OK(res)
 }
 
-// Return a paginated list of all apps for the current user.
+// GetMyApps returns a paginated list of all apps for the current user.
 func (c *AppsController) GetMyApps(ctx *app.GetMyAppsAppsContext) error {
 	var authObj *auth.Auth
 	hasAuth := auth.HasAuth(ctx)
@@ -72,7 +72,7 @@ func (c *AppsController) GetMyApps(ctx *app.GetMyAppsAppsContext) error {
 	return ctx.OK(res)
 }
 
-// Return a paginated list of apps for a particular user. Used by system admin users.
+// GetUserApps returns a paginated list of apps for a particular user. Used by system admin users.
 func (c *AppsController) GetUserApps(ctx *app.GetUserAppsAppsContext) error {
 	res, err := c.Repository.GetUserApps(ctx.UserID)
 
@@ -90,7 +90,7 @@ func (c *AppsController) GetUserApps(ctx *app.GetUserAppsAppsContext) error {
 	return ctx.OK(res)
 }
 
-// Register new app.
+// RegisterApp registers new app.
 func (c *AppsController) RegisterApp(ctx *app.RegisterAppAppsContext) error {
 	var authObj *auth.Auth
 	hasAuth := auth.HasAuth(ctx)
@@ -119,7 +119,7 @@ func (c *AppsController) RegisterApp(ctx *app.RegisterAppAppsContext) error {
 	return ctx.Created(res)
 }
 
-// Delete an app by its id.
+// DeleteApp deletes an app by its id.
 func (c *AppsController) DeleteApp(ctx *app.DeleteAppAppsContext) error {
 	err := c.Repository.DeleteApp(ctx.AppID)
 	if err != nil {
@@ -138,7 +138,7 @@ func (c *AppsController) DeleteApp(ctx *app.DeleteAppAppsContext) error {
 	return ctx.OK([]byte("Application deleted successfully "))
 }
 
-// Update an app by its id.
+// UpdateApp updates an app by its id.
 func (c *AppsController) UpdateApp(ctx *app.UpdateAppAppsContext) error {
 	res, err := c.Repository.UpdateApp(ctx.Payload, ctx.AppID)
 
@@ -158,7 +158,7 @@ func (c *AppsController) UpdateApp(ctx *app.UpdateAppAppsContext) error {
 	return ctx.OK(res)
 }
 
-// Regenerate client secret for an app.
+// RegenerateClientSecret regenerates the client secret for an app.
 func (c *AppsController) RegenerateClientSecret(ctx *app.RegenerateClientSecretAppsContext) error {
 	res, err := c.Repository.RegenerateSecret(ctx.AppID)
 
@@ -178,6 +178,7 @@ func (c *AppsController) RegenerateClientSecret(ctx *app.RegenerateClientSecretA
 	return ctx.OK(res)
 }
 
+// VerifyApp check if an app with the supplied credentials exists.
 func (c *AppsController) VerifyApp(ctx *app.VerifyAppAppsContext) error {
 	clientApp, err := c.Repository.FindApp(ctx.Payload.ID, ctx.Payload.Secret)
 	if err != nil {

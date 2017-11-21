@@ -154,6 +154,7 @@ var AppPayload = Type("AppPayload", func() {
 	Required("name")
 })
 
+// AppCredentialsPayload holds the app credentials: app ID and app secret.
 var AppCredentialsPayload = Type("AppCredentialsPayload", func() {
 	Description("App ID+secret credentials")
 	Attribute("id", String, "The app ID")

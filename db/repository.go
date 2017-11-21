@@ -28,6 +28,7 @@ type AppRepository interface {
 	FindApp(id, secret string) (*ClientApp, error)
 }
 
+// ClientApp holds the data for a registered application (client).
 type ClientApp struct {
 	ID           string `json:"id" bson:"_id"`
 	Name         string `json:"name" bson:"name"`
@@ -283,6 +284,8 @@ func (c *MongoCollection) RegenerateSecret(appID string) ([]byte, error) {
 	return res, nil
 }
 
+// FindApp tries to find an application (client) by its ID and secret.
+// Returns nil if no such app is found.
 func (c *MongoCollection) FindApp(ID, secret string) (*ClientApp, error) {
 	fmt.Println("Find APP")
 	objectID, err := hexToObjectID(ID)
