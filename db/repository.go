@@ -94,7 +94,7 @@ func (c *MongoCollection) GetApp(appID string) (*app.Apps, error) {
 		return nil, err
 	}
 
-	res := &app.Apps{}
+	res := &ClientApp{}
 	if err := c.FindId(objectID).One(&res); err != nil {
 		if err.Error() == "not found" {
 			return nil, goa.ErrNotFound("app not found.")
@@ -103,9 +103,14 @@ func (c *MongoCollection) GetApp(appID string) (*app.Apps, error) {
 		}
 	}
 
-	res.ID = appID
-
-	return res, nil
+	return &app.Apps{
+		Description:  res.Description,
+		Domain:       res.Domain,
+		ID:           appID,
+		Name:         res.Name,
+		Owner:        res.Owner,
+		RegisteredAt: int(res.RegisteredAt),
+	}, nil
 }
 
 func (c *MongoCollection) GetMyApps(userID string) ([]byte, error) {
@@ -173,7 +178,7 @@ func (c *MongoCollection) RegisterApp(payload *app.AppPayload, userID string) (*
 		"domain":       payload.Domain,
 		"owner":        userID,
 		"secret":       secret,
-		"registeredat": registeredAt,
+		"registeredAt": registeredAt,
 	})
 
 	if err != nil {
@@ -301,10 +306,8 @@ func (c *MongoCollection) FindApp(ID, secret string) (*ClientApp, error) {
 		}
 		return nil, err
 	}
-	fmt.Println("Secret from mongo: ", ca.Secret)
-	fmt.Println("Secret from   req: ", secret)
 	if ca.Secret == secret {
-
+		ca.ID = ID
 		return &ca, nil
 	}
 	return nil, nil
