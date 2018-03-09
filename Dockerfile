@@ -6,7 +6,7 @@ RUN go install github.com/JormungandrK/microservice-apps-management
 
 
 ### Main
-FROM alpine:3.6
+FROM alpine:3.7
 
 COPY --from=build /go/bin/microservice-apps-management /usr/local/bin/microservice-apps-management
 EXPOSE 8080
