@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/JormungandrK/microservice-apps-management/app"
-	"github.com/JormungandrK/microservice-apps-management/db"
-	"github.com/JormungandrK/microservice-security/auth"
+	"github.com/Microkubes/microservice-apps-management/app"
+	"github.com/Microkubes/microservice-apps-management/db"
+	"github.com/Microkubes/microservice-security/auth"
 	"github.com/goadesign/goa"
 )
 

@@ -1,8 +1,8 @@
 ### Multi-stage build
 FROM jormungandrk/goa-build as build
 
-COPY . /go/src/github.com/JormungandrK/microservice-apps-management
-RUN go install github.com/JormungandrK/microservice-apps-management
+COPY . /go/src/github.com/Microkubes/microservice-apps-management
+RUN go install github.com/Microkubes/microservice-apps-management
 
 
 ### Main

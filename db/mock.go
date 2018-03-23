@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/JormungandrK/microservice-apps-management/app"
+	"github.com/Microkubes/microservice-apps-management/app"
 	"github.com/goadesign/goa"
 )
 

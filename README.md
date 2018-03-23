@@ -1,6 +1,6 @@
 # microservice-apps-management
 
-[![Build](https://travis-ci.com/JormungandrK/microservice-apps-management.svg?token=UB5yzsLHNSbtjSYrGbWf&branch=master)](https://travis-ci.com/JormungandrK/microservice-apps-management)
+[![Build](https://travis-ci.com/Microkubes/microservice-apps-management.svg?token=UB5yzsLHNSbtjSYrGbWf&branch=master)](https://travis-ci.com/Microkubes/microservice-apps-management)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/84383c8e579c181760ed/test_coverage)](https://codeclimate.com/repos/59c2524fbed4f6028e000bb6/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/84383c8e579c181760ed/maintainability)](https://codeclimate.com/repos/59c2524fbed4f6028e000bb6/maintainability)
 
@@ -22,14 +22,14 @@ go get -u github.com/goadesign/goa/...
 Clone the repo:
 ```
 cd $GOPATH/src
-git clone https://github.com/JormungandrK/microservice-apps-management.git /path/to/project-workspace/src/github.com/JormungandrK/microservice-apps-management
+git clone https://github.com/Microkubes/microservice-apps-management.git /path/to/project-workspace/src/github.com/Microkubes/microservice-apps-management
 ```
 Be sure to use the full domain name and resource path here (compatible with ```go get```).
 
 
 Then compile and run:
 ```
-cd /path/to/project-workspace/src/github.com/JormungandrK/microservice-apps-management
+cd /path/to/project-workspace/src/github.com/Microkubes/microservice-apps-management
 go build -o apps-management
 ./apps-management
 ```
@@ -37,14 +37,14 @@ go build -o apps-management
 ## Change the design
 If you change the design then you should regenerate the files. Run:
 ```
-cd /path/to/project-workspace/src/github.com/JormungandrK/microservice-apps-management
+cd /path/to/project-workspace/src/github.com/Microkubes/microservice-apps-management
 go generate
 ```
 **NOTE:** If the above command does not update the generated code per the changes in the design,
 then run ```goagen bootstrap```:
 
 ```bash
-goagen bootstrap -d github.com/JormungandrK/microservice-apps-management/design -o .
+goagen bootstrap -d github.com/Microkubes/microservice-apps-management/design -o .
 ```
 
 
@@ -57,7 +57,7 @@ go build -o apps-management
 ## Other changes, not related to the design
 For all other changes that are not related to the design just recompile the service and start it again:
 ```
-cd $GOPATH/src/github.com/JormungandrK/microservice-apps-management
+cd $GOPATH/src/github.com/Microkubes/microservice-apps-management
 go build -o apps-management
 ./apps-management
 ```
@@ -70,7 +70,7 @@ go test -v
 
 ## Set up MongoDB
 Create apps-management database with default username and password.
-See: [Set up MongoDB](https://github.com/JormungandrK/jormungandr-infrastructure#mongodb--v346-)
+See: [Set up MongoDB](https://github.com/Microkubes/jormungandr-infrastructure#mongodb--v346-)
 ```
 export MS_DBNAME=apps-management
 ./mongo/run.sh
@@ -88,9 +88,9 @@ First, create a directory for the shh keys:
 mkdir keys
 ```
 
-Find a key that you'll use to acceess JormungandrK organization on github. Then copy the
+Find a key that you'll use to acceess Microkubes organization on github. Then copy the
 private key to the directory you created above. The build would use this key to
-access ```JormungandrK/microservice-tools``` repository.
+access ```Microkubes/microservice-tools``` repository.
 
 ```bash
 cp ~/.ssh/id_rsa keys/
@@ -126,7 +126,7 @@ docker run apps-management-microservice
 
 ## Check if the service is self-registering on Kong Gateway
 
-First make sure you have started Kong. See [Jormungandr Infrastructure](https://github.com/JormungandrK/jormungandr-infrastructure)
+First make sure you have started Kong. See [Jormungandr Infrastructure](https://github.com/Microkubes/jormungandr-infrastructure)
 on how to set up Kong locally.
 
 If you have Kong admin endpoint running on http://localhost:8001 , you're good to go.

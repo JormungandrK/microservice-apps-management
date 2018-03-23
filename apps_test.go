@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/JormungandrK/microservice-apps-management/app"
-	"github.com/JormungandrK/microservice-apps-management/app/test"
-	"github.com/JormungandrK/microservice-apps-management/db"
-	"github.com/JormungandrK/microservice-security/auth"
+	"github.com/Microkubes/microservice-apps-management/app"
+	"github.com/Microkubes/microservice-apps-management/app/test"
+	"github.com/Microkubes/microservice-apps-management/db"
+	"github.com/Microkubes/microservice-security/auth"
 	"github.com/goadesign/goa"
 )
 

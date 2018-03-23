@@ -10,7 +10,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
-	"github.com/JormungandrK/microservice-apps-management/app"
+	"github.com/Microkubes/microservice-apps-management/app"
 	"github.com/asaskevich/govalidator"
 	"github.com/goadesign/goa"
 )

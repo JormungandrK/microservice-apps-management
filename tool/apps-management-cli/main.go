@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/JormungandrK/microservice-apps-management/client"
-	"github.com/JormungandrK/microservice-apps-management/tool/cli"
+	"github.com/Microkubes/microservice-apps-management/client"
+	"github.com/Microkubes/microservice-apps-management/tool/cli"
 	goaclient "github.com/goadesign/goa/client"
 	"github.com/spf13/cobra"
 	"net/http"

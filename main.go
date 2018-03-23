@@ -1,4 +1,4 @@
-//go:generate goagen bootstrap -d github.com/JormungandrK/microservice-apps-management/design
+//go:generate goagen bootstrap -d github.com/Microkubes/microservice-apps-management/design
 
 package main
 
@@ -7,12 +7,12 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/JormungandrK/microservice-apps-management/app"
-	"github.com/JormungandrK/microservice-apps-management/db"
-	"github.com/JormungandrK/microservice-security/chain"
-	"github.com/JormungandrK/microservice-security/flow"
-	"github.com/JormungandrK/microservice-tools/config"
-	"github.com/JormungandrK/microservice-tools/gateway"
+	"github.com/Microkubes/microservice-apps-management/app"
+	"github.com/Microkubes/microservice-apps-management/db"
+	"github.com/Microkubes/microservice-security/chain"
+	"github.com/Microkubes/microservice-security/flow"
+	"github.com/Microkubes/microservice-tools/config"
+	"github.com/Microkubes/microservice-tools/gateway"
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"
 )
