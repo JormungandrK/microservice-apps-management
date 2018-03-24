@@ -10,11 +10,11 @@ RUN go get -u -v github.com/goadesign/goa/... && \
 
 
 COPY . /go/src/github.com/Microkubes/microservice-apps-management
-RUN go install github.com/Microkubes/microservice-apps-management
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go install github.com/Microkubes/microservice-apps-management
 
 
 ### Main
-FROM alpine:3.7
+FROM scratch
 
 COPY --from=build /go/bin/microservice-apps-management /microservice-apps-management
 EXPOSE 8080
