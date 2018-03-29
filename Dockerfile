@@ -16,9 +16,11 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go install github.com/Microkubes/micro
 ### Main
 FROM scratch
 
-COPY --from=build /go/bin/microservice-apps-management /microservice-apps-management
-EXPOSE 8080
-
 ENV API_GATEWAY_URL="http://localhost:8001"
+
+COPY --from=build /go/src/github.com/Microkubes/microservice-apps-management/config.json /config.json
+COPY --from=build /go/bin/microservice-apps-management /microservice-apps-management
+
+EXPOSE 8080
 
 CMD ["/microservice-apps-management"]
