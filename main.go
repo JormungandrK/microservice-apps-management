@@ -8,13 +8,15 @@ import (
 	"os"
 
 	"github.com/Microkubes/microservice-apps-management/app"
-	"github.com/Microkubes/microservice-apps-management/db"
+	pkgdb "github.com/Microkubes/microservice-apps-management/db"
 	"github.com/Microkubes/microservice-security/chain"
 	"github.com/Microkubes/microservice-security/flow"
-	"github.com/Microkubes/microservice-tools/config"
+	toolscfg "github.com/Microkubes/microservice-tools/config"
 	"github.com/Microkubes/microservice-tools/gateway"
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"
+	"github.com/JormungandrK/backends"
+
 )
 
 func main() {
@@ -24,18 +26,24 @@ func main() {
 	// Load configuration
 	gatewayAdminURL, configFile := loadGatewaySettings()
 
-	conf, err := config.LoadConfig(configFile)
+	cfg, err := toolscfg.LoadConfig(configFile)
 	if err != nil {
 		service.LogError("config", "err", err)
 		return
 	}
 
 	// Gateway self-registration
-	unregisterService := registerMicroservice(gatewayAdminURL, conf)
+	unregisterService := registerMicroservice(gatewayAdminURL, cfg)
 	defer unregisterService() // defer the unregister for after main exits
 
+	// Setup apps-management service
+	appsService, err := setupAppsService(cfg)
+	if err != nil {
+		service.LogError("config", err)
+	}
+
 	// create security chain
-	securityChain, cleanup, err := flow.NewSecurityFromConfig(conf)
+	securityChain, cleanup, err := flow.NewSecurityFromConfig(cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -49,32 +57,61 @@ func main() {
 
 	service.Use(chain.AsGoaMiddleware(securityChain))
 
-	dbConf := conf.DBConfig
-	// Create new session to MongoDB
-	session := db.NewSession(dbConf.Host, dbConf.Username, dbConf.Password, dbConf.DatabaseName)
-
-	// At the end close session
-	defer session.Close()
-
-	// Create apps collection and indexes
-	index1 := []string{"domain"}
-	index2 := []string{"name"}
-	indexes := [][]string{index1, index2}
-	collectionName := "apps"
-	collection := db.PrepareDB(session, dbConf.DatabaseName, collectionName, indexes)
-
 	// Mount "apps" controller
-	c := NewAppsController(service, &db.MongoCollection{Collection: collection})
+	c := NewAppsController(service, appsService)
 	app.MountAppsController(service, c)
+
 	// Mount "swagger" controller
-	c2 := NewSwaggerController(service)
-	app.MountSwaggerController(service, c2)
+	// c2 := NewSwaggerController(service)
+	// app.MountSwaggerController(service, c2)
 
 	// Start service
-	if err := service.ListenAndServe(fmt.Sprintf(":%d", conf.Service.MicroservicePort)); err != nil {
+	if err := service.ListenAndServe(fmt.Sprintf(":%d", cfg.Service.MicroservicePort)); err != nil {
 		service.LogError("startup", "err", err)
 	}
 
+}
+
+func setupRepository(backend backends.Backend) (backends.Repository, error) {
+	return backend.DefineRepository("apps-management", backends.RepositoryDefinitionMap{
+		"name": "apps-management",
+		"indexes": []backends.Index{
+			backends.NewUniqueIndex("id"),
+			backends.NewUniqueIndex("domain"),
+			backends.NewUniqueIndex("name"),
+		},
+		"hashKey":       "id",
+		"readCapacity":  int64(5),
+		"writeCapacity": int64(5),
+		"GSI": map[string]interface{}{
+			"name": map[string]interface{}{
+				"readCapacity":  1,
+				"writeCapacity": 1,
+			},
+		},
+	})
+}
+
+func setupBackend(dbConfig toolscfg.DBConfig) (backends.Backend, backends.BackendManager, error) {
+	dbinfoMap := map[string]*toolscfg.DBInfo{}
+	dbinfoMap[dbConfig.DBName] = &dbConfig.DBInfo
+	backendManager := backends.NewBackendSupport(dbinfoMap)
+	backend, err := backendManager.GetBackend(dbConfig.DBName)
+	return backend, backendManager, err
+}
+
+func setupAppsService(serviceConfig *toolscfg.ServiceConfig) (pkgdb.AppRepository, error) {
+	backend, _, err := setupBackend(serviceConfig.DBConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	appsRepo, err := setupRepository(backend)
+	if err != nil {
+		return nil, err
+	}
+
+	return pkgdb.NewAppsService(appsRepo), err
 }
 
 func loadGatewaySettings() (string, string) {
@@ -85,13 +122,13 @@ func loadGatewaySettings() (string, string) {
 		gatewayURL = "http://localhost:8001"
 	}
 	if serviceConfigFile == "" {
-		serviceConfigFile = "/run/secrets/microservice_apps_management_config.json"
+		serviceConfigFile = "./config.json"
 	}
 
 	return gatewayURL, serviceConfigFile
 }
 
-func registerMicroservice(gatewayAdminURL string, conf *config.ServiceConfig) func() {
+func registerMicroservice(gatewayAdminURL string, conf *toolscfg.ServiceConfig) func() {
 	registration := gateway.NewKongGateway(gatewayAdminURL, &http.Client{}, conf.Service)
 
 	err := registration.SelfRegister()
