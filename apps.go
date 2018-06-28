@@ -7,6 +7,7 @@ import (
 	"github.com/Microkubes/microservice-apps-management/db"
 	"github.com/Microkubes/microservice-security/auth"
 	"github.com/goadesign/goa"
+	errors "github.com/JormungandrK/backends"
 )
 
 // AppsController implements the apps resource.
@@ -28,16 +29,15 @@ func (c *AppsController) Get(ctx *app.GetAppsContext) error {
 	res, err := c.Repository.GetApp(ctx.AppID)
 
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 400:
-			return ctx.BadRequest(err)
-		case 404:
+		if errors.IsErrNotFound(err) {
 			return ctx.NotFound(err)
-		default:
-			return ctx.InternalServerError(err)
 		}
+		
+		if errors.IsErrAlreadyExists(err) {
+			return ctx.BadRequest(err)
+		}
+		
+		return ctx.InternalServerError(err)
 	}
 
 	return ctx.OK(res)
@@ -59,14 +59,11 @@ func (c *AppsController) GetMyApps(ctx *app.GetMyAppsAppsContext) error {
 	res, err := c.Repository.GetMyApps(userID)
 
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 404:
+		if errors.IsErrNotFound(err) {
 			return ctx.NotFound(err)
-		default:
-			return ctx.InternalServerError(err)
 		}
+		
+		return ctx.InternalServerError(err)
 	}
 
 	return ctx.OK(res)
@@ -77,14 +74,11 @@ func (c *AppsController) GetUserApps(ctx *app.GetUserAppsAppsContext) error {
 	res, err := c.Repository.GetUserApps(ctx.UserID)
 
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 404:
+		if errors.IsErrNotFound(err) {
 			return ctx.NotFound(err)
-		default:
-			return ctx.InternalServerError(err)
 		}
+		
+		return ctx.InternalServerError(err)
 	}
 
 	return ctx.OK(res)
@@ -104,16 +98,12 @@ func (c *AppsController) RegisterApp(ctx *app.RegisterAppAppsContext) error {
 	userID := authObj.UserID
 
 	res, err := c.Repository.RegisterApp(ctx.Payload, userID)
-
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 400:
+		if errors.IsErrAlreadyExists(err) {
 			return ctx.BadRequest(err)
-		default:
-			return ctx.InternalServerError(err)
 		}
+		
+		return ctx.InternalServerError(err)
 	}
 
 	return ctx.Created(res)
@@ -123,16 +113,15 @@ func (c *AppsController) RegisterApp(ctx *app.RegisterAppAppsContext) error {
 func (c *AppsController) DeleteApp(ctx *app.DeleteAppAppsContext) error {
 	err := c.Repository.DeleteApp(ctx.AppID)
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 400:
-			return ctx.BadRequest(err)
-		case 404:
+		if errors.IsErrNotFound(err) {
 			return ctx.NotFound(err)
-		default:
-			return ctx.InternalServerError(err)
 		}
+		
+		if errors.IsErrAlreadyExists(err) {
+			return ctx.BadRequest(err)
+		}
+		
+		return ctx.InternalServerError(err)
 	}
 
 	return ctx.OK([]byte("Application deleted successfully "))
@@ -143,16 +132,15 @@ func (c *AppsController) UpdateApp(ctx *app.UpdateAppAppsContext) error {
 	res, err := c.Repository.UpdateApp(ctx.Payload, ctx.AppID)
 
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 400:
-			return ctx.BadRequest(err)
-		case 404:
+		if errors.IsErrNotFound(err) {
 			return ctx.NotFound(err)
-		default:
-			return ctx.InternalServerError(err)
 		}
+		
+		if errors.IsErrAlreadyExists(err) {
+			return ctx.BadRequest(err)
+		}
+		
+		return ctx.InternalServerError(err)
 	}
 
 	return ctx.OK(res)
@@ -163,16 +151,15 @@ func (c *AppsController) RegenerateClientSecret(ctx *app.RegenerateClientSecretA
 	res, err := c.Repository.RegenerateSecret(ctx.AppID)
 
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 400:
-			return ctx.BadRequest(err)
-		case 404:
+		if errors.IsErrNotFound(err) {
 			return ctx.NotFound(err)
-		default:
-			return ctx.InternalServerError(err)
 		}
+		
+		if errors.IsErrAlreadyExists(err) {
+			return ctx.BadRequest(err)
+		}
+		
+		return ctx.InternalServerError(err)
 	}
 
 	return ctx.OK(res)
