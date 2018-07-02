@@ -7,6 +7,8 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/goadesign/goa"
 	"github.com/JormungandrK/backends"
+	"time"
+	// "fmt"
 )
 
 // AppRepository defaines the interface for accessing the application data.
@@ -34,23 +36,68 @@ type ClientApp struct {
 }
 
 func (r *BackendAppsService) GetApp(appID string) (*app.Apps, error) {
-	return nil, nil
+	apps, err := r.appsRepository.GetOne(backends.NewFilter().Match("id", appID), &ClientApp{})
+	if err != nil {
+		return nil, err
+	}
+	return apps.(*app.Apps), nil
 }
 
-func (r *BackendAppsService) GetMyApps(userID string) ([]byte, error) {
-	return nil, nil
-}
+func (r *BackendAppsService) GetMyApps(userID string) ([]byte, error) { return nil, nil }
+
+// func (r *BackendAppsService) GetMyApps(userID string) ([]byte, error) {
+// 	apps, err := r.appsRepository.GetAll(backends.NewFilter().Match("id", userID), &ClientApp{})
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return apps.(*app.Apps), nil
+// }
 
 func (r *BackendAppsService) GetUserApps(userID string) ([]byte, error) {
 	return nil, nil
 }
 
 func (r *BackendAppsService) RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error) {
-	return nil, nil
+	secret, err := GenerateRandomString(42)
+	if err != nil {
+		return nil, err
+	}
+
+	registerClientApp := &ClientApp{
+		Name:	payload.Name,
+		Description: *payload.Description,
+		Domain:	*payload.Domain,
+		Secret: secret,
+		RegisteredAt: int64(time.Now().Unix()),
+		Owner:	userID,
+	}
+
+	// result, err := r.appsRepository.Save(registerClientApp, backends.NewFilter().Match("id", userID))
+	result, err := r.appsRepository.Save(registerClientApp, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	regCli := &ClientApp{}
+	if err = backends.MapToInterface(result, regCli); err != nil {
+		return nil, err
+	}
+
+	regApp := &app.RegApps {
+		ID: regCli.ID,
+		Secret: regCli.Secret,
+	}
+
+	return regApp, err
 }
 
 func (r *BackendAppsService) DeleteApp(appID string) error {
-	return nil
+	err := r.appsRepository.DeleteOne(backends.NewFilter().Match("id", appID))
+	if err != nil {
+		return err
+	}
+
+	return err
 }
 
 func (r *BackendAppsService) UpdateApp(payload *app.AppPayload, appID string) (*app.Apps, error) {

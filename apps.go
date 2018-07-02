@@ -86,16 +86,17 @@ func (c *AppsController) GetUserApps(ctx *app.GetUserAppsAppsContext) error {
 
 // RegisterApp registers new app.
 func (c *AppsController) RegisterApp(ctx *app.RegisterAppAppsContext) error {
-	var authObj *auth.Auth
-	hasAuth := auth.HasAuth(ctx)
+	// var authObj *auth.Auth
+	// hasAuth := auth.HasAuth(ctx)
 
-	if hasAuth {
-		authObj = auth.GetAuth(ctx.Context)
-	} else {
-		return ctx.InternalServerError(goa.ErrInternal("Auth has not been set"))
-	}
+	// if hasAuth {
+	// 	authObj = auth.GetAuth(ctx.Context)
+	// } else {
+	// 	return ctx.InternalServerError(goa.ErrInternal("Auth has not been set"))
+	// }
 
-	userID := authObj.UserID
+	// userID := authObj.UserID
+	userID := "test user"
 
 	res, err := c.Repository.RegisterApp(ctx.Payload, userID)
 	if err != nil {
