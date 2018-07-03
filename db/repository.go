@@ -8,7 +8,7 @@ import (
 	"github.com/goadesign/goa"
 	"github.com/JormungandrK/backends"
 	"time"
-	"fmt"
+	// "fmt"
 )
 
 // AppRepository defaines the interface for accessing the application data.
@@ -92,7 +92,17 @@ func (r *BackendAppsService) DeleteApp(appID string) error {
 }
 
 func (r *BackendAppsService) UpdateApp(payload *app.AppPayload, appID string) (*app.Apps, error) {
-	return nil, nil
+	result, err := r.appsRepository.Save(payload, backends.NewFilter().Match("id", appID))
+	if err != nil {
+		return nil, err
+	}
+
+	regCli := &app.Apps{}
+	if err = backends.MapToInterface(result, regCli); err != nil {
+		return nil, err
+	}
+
+	return regCli, err
 }
 
 func (r *BackendAppsService) RegenerateSecret(appID string) ([]byte, error) {
