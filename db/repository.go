@@ -40,14 +40,31 @@ func (r *BackendAppsService) GetApp(appID string) (*app.Apps, error) {
 	if err != nil {
 		return nil, err
 	}
-	return apps.(*app.Apps), nil
+
+	regCli := &app.Apps{}
+	if err = backends.MapToInterface(apps, regCli); err != nil {
+		return nil, err
+	}
+
+	return regCli, nil
 }
 
 func (r *BackendAppsService) GetMyApps(userID string) ([]byte, error) { return nil, nil }
+func (r *BackendAppsService) GetUserApps(userID string) ([]byte, error) { return nil, nil }
 
-func (r *BackendAppsService) GetUserApps(userID string) ([]byte, error) {
-	return nil, nil
-}
+func (r *BackendAppsService) FindApp(id, secret string) (*ClientApp, error) { 
+	apps, err := r.appsRepository.GetOne(backends.NewFilter().Match("id", id).Match("secret", secret), &ClientApp{})
+	if err != nil {
+		return nil, err
+	}
+	
+	regCli := &ClientApp{}
+	if err = backends.MapToInterface(apps, regCli); err != nil {
+		return nil, err
+	}
+
+	return regCli, nil
+ }
 
 func (r *BackendAppsService) RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error) {
 	secret, err := GenerateRandomString(42)
@@ -129,9 +146,6 @@ func (r *BackendAppsService) RegenerateSecret(appID string) ([]byte, error) {
 	return []byte(regCli.Secret), err
 }
 
-func (r *BackendAppsService) FindApp(id, secret string) (*ClientApp, error) {
-	return nil, nil
-}
 
 // GenerateRandomBytes returns securely generated random bytes.
 // It will return an error if the system's secure random number generator fails to
