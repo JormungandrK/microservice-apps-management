@@ -8,7 +8,7 @@ import (
 	"github.com/goadesign/goa"
 	"github.com/JormungandrK/backends"
 	"time"
-	// "fmt"
+	"fmt"
 )
 
 // AppRepository defaines the interface for accessing the application data.
@@ -45,14 +45,6 @@ func (r *BackendAppsService) GetApp(appID string) (*app.Apps, error) {
 
 func (r *BackendAppsService) GetMyApps(userID string) ([]byte, error) { return nil, nil }
 
-// func (r *BackendAppsService) GetMyApps(userID string) ([]byte, error) {
-// 	apps, err := r.appsRepository.GetAll(backends.NewFilter().Match("id", userID), &ClientApp{})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return apps.(*app.Apps), nil
-// }
-
 func (r *BackendAppsService) GetUserApps(userID string) ([]byte, error) {
 	return nil, nil
 }
@@ -72,7 +64,6 @@ func (r *BackendAppsService) RegisterApp(payload *app.AppPayload, userID string)
 		Owner:	userID,
 	}
 
-	// result, err := r.appsRepository.Save(registerClientApp, backends.NewFilter().Match("id", userID))
 	result, err := r.appsRepository.Save(registerClientApp, nil)
 	if err != nil {
 		return nil, err
@@ -105,7 +96,27 @@ func (r *BackendAppsService) UpdateApp(payload *app.AppPayload, appID string) (*
 }
 
 func (r *BackendAppsService) RegenerateSecret(appID string) ([]byte, error) {
-	return nil, nil
+	app, err := r.appsRepository.GetOne(backends.NewFilter().Match("id", appID), &ClientApp{})
+	if err != nil {
+		return nil, err
+	}
+
+	regCli := &ClientApp{}
+	if err = backends.MapToInterface(app, regCli); err != nil {
+		return nil, err
+	}
+
+	regCli.Secret, err = GenerateRandomString(42)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = r.appsRepository.Save(regCli, backends.NewFilter().Match("id", appID))
+	if err != nil {
+		return nil, err
+	}
+
+	return []byte(regCli.Secret), err
 }
 
 func (r *BackendAppsService) FindApp(id, secret string) (*ClientApp, error) {
