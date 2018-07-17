@@ -5,9 +5,10 @@ import (
 
 	"github.com/Microkubes/microservice-apps-management/app"
 	"github.com/Microkubes/microservice-apps-management/db"
-	"github.com/Microkubes/microservice-security/auth"
+	// "github.com/Microkubes/microservice-security/auth"
 	"github.com/goadesign/goa"
 	errors "github.com/JormungandrK/backends"
+	"strconv"
 )
 
 // AppsController implements the apps resource.
@@ -45,19 +46,30 @@ func (c *AppsController) Get(ctx *app.GetAppsContext) error {
 
 // GetMyApps returns a paginated list of all apps for the current user.
 func (c *AppsController) GetMyApps(ctx *app.GetMyAppsAppsContext) error {
-	var authObj *auth.Auth
-	hasAuth := auth.HasAuth(ctx)
+	// var authObj *auth.Auth
+	// hasAuth := auth.HasAuth(ctx)
 
-	if hasAuth {
-		authObj = auth.GetAuth(ctx.Context)
-	} else {
-		return ctx.InternalServerError(goa.ErrInternal("Auth has not been set"))
-	}
+	// if hasAuth {
+	// 	authObj = auth.GetAuth(ctx.Context)
+	// } else {
+	// 	return ctx.InternalServerError(goa.ErrInternal("Auth has not been set"))
+	// }
 
-	userID := authObj.UserID
+	// userID := authObj.UserID
+	userID := "test user"
 
-	res, err := c.Repository.GetMyApps(userID)
+	queryValues := ctx.URL.Query()
 
+	order := queryValues.Get("order")
+	sorting := queryValues.Get("sorting")
+	
+	l := queryValues.Get("limit")
+	o := queryValues.Get("offset")
+
+	limit, _ := strconv.Atoi(l)
+	offset, _ := strconv.Atoi(o)
+
+	res, err := c.Repository.GetMyApps(userID, order, sorting, limit, offset)
 	if err != nil {
 		if errors.IsErrNotFound(err) {
 			return ctx.NotFound(err)
@@ -98,7 +110,7 @@ func (c *AppsController) RegisterApp(ctx *app.RegisterAppAppsContext) error {
 	// userID := authObj.UserID
 	userID := "test user"
 
-	res, err := c.Repository.RegisterApp(ctx.Payload, userID)
+	res, err := c.Repository.RegisterApp(ctx.Payload.(*app.AppPayload), userID)
 	if err != nil {
 		if errors.IsErrAlreadyExists(err) {
 			return ctx.BadRequest(err)

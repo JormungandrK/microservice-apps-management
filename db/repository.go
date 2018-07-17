@@ -8,14 +8,14 @@ import (
 	"github.com/goadesign/goa"
 	"github.com/JormungandrK/backends"
 	"time"
-	// "fmt"
+	"fmt"
 )
 
 // AppRepository defaines the interface for accessing the application data.
 type AppRepository interface {
 	// GetApp looks up a applications by the app ID.
 	GetApp(appID string) (*app.Apps, error)
-	GetMyApps(userID string) ([]byte, error)
+	GetMyApps(userID, order, sorting string, limit, offset int) ([]byte, error)
 	GetUserApps(userID string) ([]byte, error)
 	RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error)
 	DeleteApp(appID string) error
@@ -49,8 +49,21 @@ func (r *BackendAppsService) GetApp(appID string) (*app.Apps, error) {
 	return regCli, nil
 }
 
-func (r *BackendAppsService) GetMyApps(userID string) ([]byte, error) { return nil, nil }
-func (r *BackendAppsService) GetUserApps(userID string) ([]byte, error) { return nil, nil }
+func (r *BackendAppsService) GetMyApps(userID, order, sorting string, limit, offset int) ([]byte, error) {
+	var resultsTypeInterface []byte
+
+	// userID, order, sorting string, limit, offset int
+	apps, err := r.appsRepository.GetAll(backends.NewFilter().Match("id", userID), resultsTypeInterface, order, sorting, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func (r *BackendAppsService) GetUserApps(userID string) ([]byte, error) { 
+	return nil, nil
+}
 
 func (r *BackendAppsService) FindApp(id, secret string) (*ClientApp, error) { 
 	apps, err := r.appsRepository.GetOne(backends.NewFilter().Match("id", id).Match("secret", secret), &ClientApp{})
@@ -64,7 +77,7 @@ func (r *BackendAppsService) FindApp(id, secret string) (*ClientApp, error) {
 	}
 
 	return regCli, nil
- }
+}
 
 func (r *BackendAppsService) RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error) {
 	secret, err := GenerateRandomString(42)
