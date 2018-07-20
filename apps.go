@@ -56,7 +56,7 @@ func (c *AppsController) GetMyApps(ctx *app.GetMyAppsAppsContext) error {
 	// }
 
 	// userID := authObj.UserID
-	userID := "test user"
+	userID := "5b5071cd06c2676796f68201"
 
 	queryValues := ctx.URL.Query()
 
@@ -83,8 +83,18 @@ func (c *AppsController) GetMyApps(ctx *app.GetMyAppsAppsContext) error {
 
 // GetUserApps returns a paginated list of apps for a particular user. Used by system admin users.
 func (c *AppsController) GetUserApps(ctx *app.GetUserAppsAppsContext) error {
-	res, err := c.Repository.GetUserApps(ctx.UserID)
+	queryValues := ctx.URL.Query()
 
+	order := queryValues.Get("order")
+	sorting := queryValues.Get("sorting")
+	
+	l := queryValues.Get("limit")
+	o := queryValues.Get("offset")
+
+	limit, _ := strconv.Atoi(l)
+	offset, _ := strconv.Atoi(o)
+
+	res, err := c.Repository.GetUserApps(ctx.UserID, order, sorting, limit, offset)
 	if err != nil {
 		if errors.IsErrNotFound(err) {
 			return ctx.NotFound(err)

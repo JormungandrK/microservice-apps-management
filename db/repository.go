@@ -8,7 +8,7 @@ import (
 	"github.com/goadesign/goa"
 	"github.com/JormungandrK/backends"
 	"time"
-	"fmt"
+	"encoding/json"
 )
 
 // AppRepository defaines the interface for accessing the application data.
@@ -16,7 +16,7 @@ type AppRepository interface {
 	// GetApp looks up a applications by the app ID.
 	GetApp(appID string) (*app.Apps, error)
 	GetMyApps(userID, order, sorting string, limit, offset int) ([]byte, error)
-	GetUserApps(userID string) ([]byte, error)
+	GetUserApps(uuserID, order, sorting string, limit, offset int) ([]byte, error)
 	RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error)
 	DeleteApp(appID string) error
 	UpdateApp(payload *app.AppPayload, appID string) (*app.Apps, error)
@@ -52,17 +52,23 @@ func (r *BackendAppsService) GetApp(appID string) (*app.Apps, error) {
 func (r *BackendAppsService) GetMyApps(userID, order, sorting string, limit, offset int) ([]byte, error) {
 	var resultsTypeInterface []byte
 
-	// userID, order, sorting string, limit, offset int
 	apps, err := r.appsRepository.GetAll(backends.NewFilter().Match("id", userID), resultsTypeInterface, order, sorting, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return json.Marshal(apps)
 }
 
-func (r *BackendAppsService) GetUserApps(userID string) ([]byte, error) { 
-	return nil, nil
+func (r *BackendAppsService) GetUserApps(userID, order, sorting string, limit, offset int) ([]byte, error) { 
+	var resultsTypeInterface []byte
+
+	apps, err := r.appsRepository.GetAll(backends.NewFilter().Match("id", userID), resultsTypeInterface, order, sorting, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return json.Marshal(apps)
 }
 
 func (r *BackendAppsService) FindApp(id, secret string) (*ClientApp, error) { 
