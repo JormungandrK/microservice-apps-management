@@ -19,6 +19,11 @@ var _ = API("apps-management", func() {
 var _ = Resource("apps", func() {
 	BasePath("/apps")
 
+	// Alows preflight request - HTTP OPTIONS
+	Origin("*", func() {
+		Methods("OPTIONS")
+	})
+
 	Action("get", func() {
 		Description("Get app by id")
 		Routing(GET("/:appId"))
