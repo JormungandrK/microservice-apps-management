@@ -56,7 +56,7 @@ definitions:
       id: Possimus vel.
       name: f0iuv3mp0p
       owner: In rerum.
-      registeredAt: 2.7170617e+18
+      registeredAt: 2.7170617494452116e+18
     properties:
       description:
         description: Description of the app
@@ -82,7 +82,7 @@ definitions:
         type: string
       registeredAt:
         description: Time when app is registered
-        example: 2.7170617e+18
+        example: 2.7170617494452116e+18
         format: int64
         type: integer
     required:
@@ -101,7 +101,7 @@ definitions:
       detail: Value of ID must be an integer
       id: 3F1FKVRR
       meta:
-        timestamp: 1.458609e+09
+        timestamp: 1.458609066e+09
       status: "400"
     properties:
       code:
@@ -122,7 +122,7 @@ definitions:
         description: a meta object containing non-standard meta-information about
           the error.
         example:
-          timestamp: 1.458609e+09
+          timestamp: 1.458609066e+09
         type: object
       status:
         description: the HTTP status code applicable to this problem, expressed as
@@ -170,7 +170,6 @@ paths:
       produces:
       - application/vnd.goa.error
       - application/vnd.goa.reg.apps+json
-      - application/vnd.goa.error
       responses:
         "201":
           description: Created
@@ -199,8 +198,6 @@ paths:
         required: true
         type: string
       produces:
-      - application/vnd.goa.error
-      - application/vnd.goa.error
       - application/vnd.goa.error
       - text/plain
       responses:
@@ -233,10 +230,8 @@ paths:
         required: true
         type: string
       produces:
-      - application/vnd.goa.error
-      - application/vnd.goa.error
-      - application/vnd.goa.error
       - application/vnd.goa.apps+json
+      - application/vnd.goa.error
       responses:
         "200":
           description: OK
@@ -274,10 +269,8 @@ paths:
         schema:
           $ref: '#/definitions/AppPayload'
       produces:
-      - application/vnd.goa.error
-      - application/vnd.goa.error
-      - application/vnd.goa.error
       - application/vnd.goa.apps+json
+      - application/vnd.goa.error
       responses:
         "200":
           description: OK
@@ -311,8 +304,6 @@ paths:
         type: string
       produces:
       - application/vnd.goa.error
-      - application/vnd.goa.error
-      - application/vnd.goa.error
       - text/plain
       responses:
         "200":
@@ -339,7 +330,6 @@ paths:
       description: Get all user's apps
       operationId: apps#getMyApps
       produces:
-      - application/vnd.goa.error
       - application/vnd.goa.error
       - text/plain
       responses:
@@ -370,7 +360,6 @@ paths:
         type: string
       produces:
       - application/vnd.goa.error
-      - application/vnd.goa.error
       - text/plain
       responses:
         "200":
@@ -400,9 +389,8 @@ paths:
         schema:
           $ref: '#/definitions/AppCredentialsPayload'
       produces:
-      - application/vnd.goa.error
-      - application/vnd.goa.error
       - application/vnd.goa.apps+json
+      - application/vnd.goa.error
       responses:
         "200":
           description: OK
