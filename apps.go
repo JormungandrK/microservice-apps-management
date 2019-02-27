@@ -12,11 +12,11 @@ import (
 // AppsController implements the apps resource.
 type AppsController struct {
 	*goa.Controller
-	Repository db.AppRepository
+	Repository db.AppsManagementStore
 }
 
 // NewAppsController creates a apps controller.
-func NewAppsController(service *goa.Service, repository db.AppRepository) *AppsController {
+func NewAppsController(service *goa.Service, repository db.AppsManagementStore) *AppsController {
 	return &AppsController{
 		Controller: service.NewController("AppsController"),
 		Repository: repository,
