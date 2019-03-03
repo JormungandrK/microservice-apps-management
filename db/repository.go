@@ -62,16 +62,18 @@ func (c *BackendAppsManagementStore) GetMyApps(userID string) ([]byte, error) {
 		return nil, err
 	}
 
-	appsSerialized := apps.([]map[string]interface{})
+	appsSerialized := apps.(*[]*map[string]interface{})
+	appsValue := *appsSerialized
 
-	if len(appsSerialized) == 0 {
+	if len(appsValue) == 0 {
 		return nil, goa.ErrNotFound("no apps found")
 	}
 
-	for _, client := range appsSerialized {
-		client["id"] = client["_id"]
-		delete(client, "_id")
-		delete(client, "secret")
+	for _, client := range appsValue {
+		clientValue := *client
+		clientValue["id"] = clientValue["_id"]
+		delete(clientValue, "_id")
+		delete(clientValue, "secret")
 	}
 
 	res, err := json.Marshal(apps)
@@ -91,15 +93,17 @@ func (c *BackendAppsManagementStore) GetUserApps(userID string) ([]byte, error) 
 		return nil, err
 	}
 
-	appsSerialized := apps.([]map[string]interface{})
+	appsSerialized := apps.(*[]*map[string]interface{})
+	appsValue := *appsSerialized
 
-	if len(appsSerialized) == 0 {
+	if len(appsValue) == 0 {
 		return nil, goa.ErrNotFound("no apps found")
 	}
 
-	for _, client := range appsSerialized {
-		client["id"] = client["_id"]
-		delete(client, "_id")
+	for _, client := range appsValue {
+		clientValue := *client
+		clientValue["id"] = clientValue["_id"]
+		delete(clientValue, "_id")
 	}
 
 	res, err := json.Marshal(apps)
