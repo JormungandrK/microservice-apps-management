@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/Microkubes/backends"
 	"github.com/Microkubes/microservice-apps-management/app"
 	"github.com/Microkubes/microservice-apps-management/db"
 	"github.com/Microkubes/microservice-security/auth"
@@ -28,16 +29,13 @@ func (c *AppsController) Get(ctx *app.GetAppsContext) error {
 	res, err := c.Repository.GetApp(ctx.AppID)
 
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 400:
-			return ctx.BadRequest(err)
-		case 404:
-			return ctx.NotFound(err)
-		default:
-			return ctx.InternalServerError(err)
+		if backends.IsErrNotFound(err) {
+			return ctx.NotFound(goa.ErrNotFound(err))
 		}
+		if backends.IsErrInvalidInput(err) {
+			return ctx.BadRequest(goa.ErrBadRequest(err))
+		}
+		return ctx.InternalServerError(goa.ErrInternal(err))
 	}
 
 	return ctx.OK(res)
@@ -59,14 +57,10 @@ func (c *AppsController) GetMyApps(ctx *app.GetMyAppsAppsContext) error {
 	res, err := c.Repository.GetMyApps(userID)
 
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 404:
-			return ctx.NotFound(err)
-		default:
-			return ctx.InternalServerError(err)
+		if backends.IsErrNotFound(err) {
+			return ctx.NotFound(goa.ErrNotFound(err))
 		}
+		return ctx.InternalServerError(goa.ErrInternal(err))
 	}
 
 	return ctx.OK(res)
@@ -77,14 +71,10 @@ func (c *AppsController) GetUserApps(ctx *app.GetUserAppsAppsContext) error {
 	res, err := c.Repository.GetUserApps(ctx.UserID)
 
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 404:
-			return ctx.NotFound(err)
-		default:
-			return ctx.InternalServerError(err)
+		if backends.IsErrNotFound(err) {
+			return ctx.NotFound(goa.ErrNotFound(err))
 		}
+		return ctx.InternalServerError(goa.ErrInternal(err))
 	}
 
 	return ctx.OK(res)
@@ -106,14 +96,10 @@ func (c *AppsController) RegisterApp(ctx *app.RegisterAppAppsContext) error {
 	res, err := c.Repository.RegisterApp(ctx.Payload, userID)
 
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 400:
-			return ctx.BadRequest(err)
-		default:
-			return ctx.InternalServerError(err)
+		if backends.IsErrInvalidInput(err) {
+			return ctx.BadRequest(goa.ErrBadRequest(err))
 		}
+		return ctx.InternalServerError(goa.ErrInternal(err))
 	}
 
 	return ctx.Created(res)
@@ -123,16 +109,13 @@ func (c *AppsController) RegisterApp(ctx *app.RegisterAppAppsContext) error {
 func (c *AppsController) DeleteApp(ctx *app.DeleteAppAppsContext) error {
 	err := c.Repository.DeleteApp(ctx.AppID)
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 400:
-			return ctx.BadRequest(err)
-		case 404:
-			return ctx.NotFound(err)
-		default:
-			return ctx.InternalServerError(err)
+		if backends.IsErrNotFound(err) {
+			return ctx.NotFound(goa.ErrNotFound(err))
 		}
+		if backends.IsErrInvalidInput(err) {
+			return ctx.BadRequest(goa.ErrBadRequest(err))
+		}
+		return ctx.InternalServerError(goa.ErrInternal(err))
 	}
 
 	return ctx.OK([]byte("Application deleted successfully "))
@@ -143,16 +126,13 @@ func (c *AppsController) UpdateApp(ctx *app.UpdateAppAppsContext) error {
 	res, err := c.Repository.UpdateApp(ctx.Payload, ctx.AppID)
 
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 400:
-			return ctx.BadRequest(err)
-		case 404:
-			return ctx.NotFound(err)
-		default:
-			return ctx.InternalServerError(err)
+		if backends.IsErrNotFound(err) {
+			return ctx.NotFound(goa.ErrNotFound(err))
 		}
+		if backends.IsErrInvalidInput(err) {
+			return ctx.BadRequest(goa.ErrBadRequest(err))
+		}
+		return ctx.InternalServerError(goa.ErrInternal(err))
 	}
 
 	return ctx.OK(res)
@@ -163,16 +143,13 @@ func (c *AppsController) RegenerateClientSecret(ctx *app.RegenerateClientSecretA
 	res, err := c.Repository.RegenerateSecret(ctx.AppID)
 
 	if err != nil {
-		e := err.(*goa.ErrorResponse)
-
-		switch e.Status {
-		case 400:
-			return ctx.BadRequest(err)
-		case 404:
-			return ctx.NotFound(err)
-		default:
-			return ctx.InternalServerError(err)
+		if backends.IsErrNotFound(err) {
+			return ctx.NotFound(goa.ErrNotFound(err))
 		}
+		if backends.IsErrInvalidInput(err) {
+			return ctx.BadRequest(goa.ErrBadRequest(err))
+		}
+		return ctx.InternalServerError(goa.ErrInternal(err))
 	}
 
 	return ctx.OK(res)

@@ -39,7 +39,7 @@ type ClientApp struct {
 	Secret       string `json:"secret" bson:"secret"`
 }
 
-// BackendAppsManagementStore is a struct containing collection for accessing to a MongoDB.
+// BackendAppsManagementStore holds a repository for a certain backend.
 // Implements the AppsManagementStore interface.
 type BackendAppsManagementStore struct {
 	repository backends.Repository
@@ -47,11 +47,21 @@ type BackendAppsManagementStore struct {
 
 // GetApp retrieves an application by id
 func (c *BackendAppsManagementStore) GetApp(appID string) (*app.Apps, error) {
-	clientApp, err := c.repository.GetOne(backends.NewFilter().Match("id", appID), &ClientApp{})
+	res, err := c.repository.GetOne(backends.NewFilter().Match("id", appID), &ClientApp{})
 	if err != nil {
 		return nil, err
 	}
-	return clientApp.(*app.Apps), nil
+
+	clientApp := res.(*ClientApp)
+
+	return &app.Apps{
+		Description:  clientApp.Description,
+		Domain:       clientApp.Domain,
+		ID:           appID,
+		Name:         clientApp.Name,
+		Owner:        clientApp.Owner,
+		RegisteredAt: int(clientApp.RegisteredAt),
+	}, nil
 }
 
 // GetMyApps retrieves applications for current user
@@ -71,8 +81,6 @@ func (c *BackendAppsManagementStore) GetMyApps(userID string) ([]byte, error) {
 
 	for _, client := range appsValue {
 		clientValue := *client
-		clientValue["id"] = clientValue["_id"]
-		delete(clientValue, "_id")
 		delete(clientValue, "secret")
 	}
 
@@ -100,12 +108,6 @@ func (c *BackendAppsManagementStore) GetUserApps(userID string) ([]byte, error) 
 		return nil, goa.ErrNotFound("no apps found")
 	}
 
-	for _, client := range appsValue {
-		clientValue := *client
-		clientValue["id"] = clientValue["_id"]
-		delete(clientValue, "_id")
-	}
-
 	res, err := json.Marshal(apps)
 
 	if err != nil {
@@ -117,11 +119,11 @@ func (c *BackendAppsManagementStore) GetUserApps(userID string) ([]byte, error) 
 
 // RegisterApp creates a new application for a user
 func (c *BackendAppsManagementStore) RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error) {
-	exitsting, err := c.repository.GetOne(backends.NewFilter().Match("name", payload.Name), &ClientApp{})
-	if err != nil {
+	existing, err := c.repository.GetOne(backends.NewFilter().Match("name", payload.Name), &ClientApp{})
+	if err != nil && err.Error() != "not found" {
 		return nil, goa.ErrInternal(err)
 	}
-	if exitsting != nil {
+	if existing != nil {
 		return nil, goa.ErrBadRequest("that application already exists")
 	}
 
@@ -173,13 +175,23 @@ func (c *BackendAppsManagementStore) DeleteApp(appID string) error {
 
 // UpdateApp updates an application by id
 func (c *BackendAppsManagementStore) UpdateApp(payload *app.AppPayload, appID string) (*app.Apps, error) {
-	clientApp := &ClientApp{
-		Name:        payload.Name,
-		Description: *payload.Description,
-		Domain:      *payload.Domain,
+	res, err := c.repository.GetOne(backends.NewFilter().Match("id", appID), &ClientApp{})
+	if err != nil {
+		return nil, err
+	}
+	existing := res.(*ClientApp)
+
+	existing.Name = payload.Name
+
+	if payload.Description != nil {
+		existing.Description = *payload.Description
 	}
 
-	res, err := c.repository.Save(clientApp, backends.NewFilter().Match("id", appID))
+	if payload.Domain != nil {
+		existing.Domain = *payload.Domain
+	}
+
+	res, err = c.repository.Save(existing, backends.NewFilter().Match("id", appID))
 	if err != nil {
 		if err.Error() == "not found" {
 			return nil, goa.ErrNotFound("application not found.")
@@ -187,13 +199,16 @@ func (c *BackendAppsManagementStore) UpdateApp(payload *app.AppPayload, appID st
 		return nil, goa.ErrInternal(err)
 	}
 
-	dbClientApp := &app.Apps{}
+	clientApp := res.(*ClientApp)
 
-	if err = backends.MapToInterface(res, dbClientApp); err != nil {
-		return nil, err
-	}
-
-	return dbClientApp, nil
+	return &app.Apps{
+		Description:  clientApp.Description,
+		Domain:       clientApp.Domain,
+		ID:           appID,
+		Name:         clientApp.Name,
+		Owner:        clientApp.Owner,
+		RegisteredAt: int(clientApp.RegisteredAt),
+	}, nil
 }
 
 // RegenerateSecret creates a new secret for an application by id
@@ -203,11 +218,15 @@ func (c *BackendAppsManagementStore) RegenerateSecret(appID string) ([]byte, err
 		return nil, goa.ErrInternal(err)
 	}
 
-	clientApp := &ClientApp{
-		Secret: secret,
+	res, err := c.repository.GetOne(backends.NewFilter().Match("id", appID), &ClientApp{})
+	if err != nil {
+		return nil, err
 	}
+	existing := res.(*ClientApp)
 
-	client, err := c.repository.Save(clientApp, backends.NewFilter().Match("id", appID))
+	existing.Secret = secret
+
+	client, err := c.repository.Save(existing, backends.NewFilter().Match("id", appID))
 	if err != nil {
 		if err.Error() == "not found" {
 			return nil, goa.ErrNotFound("application not found.")
@@ -215,12 +234,12 @@ func (c *BackendAppsManagementStore) RegenerateSecret(appID string) ([]byte, err
 		return nil, goa.ErrInternal(err)
 	}
 
-	res, err := json.Marshal(client)
+	resp, err := json.Marshal(client)
 	if err != nil {
 		return nil, goa.ErrInternal(err)
 	}
 
-	return res, nil
+	return resp, nil
 }
 
 // FindApp tries to find an application (client) by its ID and secret.
