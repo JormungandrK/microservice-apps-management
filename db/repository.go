@@ -4,19 +4,19 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"time"
 
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 
+	"github.com/Microkubes/backends"
 	"github.com/Microkubes/microservice-apps-management/app"
+	"github.com/Microkubes/microservice-tools/config"
 	"github.com/asaskevich/govalidator"
 	"github.com/goadesign/goa"
 )
 
-// AppRepository defaines the interface for accessing the application data.
-type AppRepository interface {
+// AppsManagementStore defaines the interface for accessing the application data.
+type AppsManagementStore interface {
 	// GetApp looks up a applications by the app ID.
 	GetApp(appID string) (*app.Apps, error)
 	GetMyApps(userID string) ([]byte, error)
@@ -39,97 +39,53 @@ type ClientApp struct {
 	Secret       string `json:"secret" bson:"secret"`
 }
 
-// MongoCollection wraps a mgo.Collection to embed methods in models.
-type MongoCollection struct {
-	*mgo.Collection
+// BackendAppsManagementStore holds a repository for a certain backend.
+// Implements the AppsManagementStore interface.
+type BackendAppsManagementStore struct {
+	repository backends.Repository
 }
 
-// NewSession returns a new Mongo Session.
-func NewSession(Host string, Username string, Password string, Database string) *mgo.Session {
-	session, err := mgo.DialWithInfo(&mgo.DialInfo{
-		Addrs:    []string{Host},
-		Username: Username,
-		Password: Password,
-		Database: Database,
-		Timeout:  30 * time.Second,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	// SetMode - consistency mode for the session.
-	session.SetMode(mgo.Monotonic, true)
-
-	return session
-}
-
-// PrepareDB ensure presence of persistent and immutable data in the DB.
-func PrepareDB(session *mgo.Session, db string, dbCollection string, indexes [][]string) *mgo.Collection {
-	// Create collection
-	collection := session.DB(db).C(dbCollection)
-
-	// Define indexes
-	for _, elem := range indexes {
-		i := elem
-		index := mgo.Index{
-			Key:        i,
-			Unique:     true,
-			DropDups:   false,
-			Background: true,
-			Sparse:     true,
-		}
-
-		// Create indexes
-		if err := collection.EnsureIndex(index); err != nil {
-			panic(err)
-		}
-	}
-
-	return collection
-}
-
-func (c *MongoCollection) GetApp(appID string) (*app.Apps, error) {
-	objectID, err := hexToObjectID(appID)
+// GetApp retrieves an application by id
+func (c *BackendAppsManagementStore) GetApp(appID string) (*app.Apps, error) {
+	res, err := c.repository.GetOne(backends.NewFilter().Match("id", appID), &ClientApp{})
 	if err != nil {
 		return nil, err
 	}
 
-	res := &ClientApp{}
-	if err := c.FindId(objectID).One(&res); err != nil {
-		if err.Error() == "not found" {
-			return nil, goa.ErrNotFound("app not found.")
-		} else {
-			return nil, goa.ErrInternal(err)
-		}
-	}
+	clientApp := res.(*ClientApp)
 
 	return &app.Apps{
-		Description:  res.Description,
-		Domain:       res.Domain,
+		Description:  clientApp.Description,
+		Domain:       clientApp.Domain,
 		ID:           appID,
-		Name:         res.Name,
-		Owner:        res.Owner,
-		RegisteredAt: int(res.RegisteredAt),
+		Name:         clientApp.Name,
+		Owner:        clientApp.Owner,
+		RegisteredAt: int(clientApp.RegisteredAt),
 	}, nil
 }
 
-func (c *MongoCollection) GetMyApps(userID string) ([]byte, error) {
-	var apps []map[string]interface{}
-	if err := c.Find(bson.M{"owner": userID}).Sort("registeredat").All(&apps); err != nil {
-		return nil, goa.ErrInternal(err)
+// GetMyApps retrieves applications for current user
+func (c *BackendAppsManagementStore) GetMyApps(userID string) ([]byte, error) {
+	var typeHint map[string]interface{}
+	apps, err := c.repository.GetAll(backends.NewFilter().Match("owner", userID), typeHint, "registeredat", "asc", 0, 0)
+	if err != nil {
+		return nil, err
 	}
 
-	if len(apps) == 0 {
-		return nil, goa.ErrNotFound("no apps found!")
+	appsSerialized := apps.(*[]*map[string]interface{})
+	appsValue := *appsSerialized
+
+	if len(appsValue) == 0 {
+		return nil, goa.ErrNotFound("no apps found")
 	}
 
-	for _, client := range apps {
-		client["id"] = client["_id"]
-		delete(client, "_id")
-		delete(client, "secret")
+	for _, client := range appsValue {
+		clientValue := *client
+		delete(clientValue, "secret")
 	}
 
 	res, err := json.Marshal(apps)
+
 	if err != nil {
 		return nil, goa.ErrInternal(err)
 	}
@@ -137,22 +93,23 @@ func (c *MongoCollection) GetMyApps(userID string) ([]byte, error) {
 	return res, nil
 }
 
-func (c *MongoCollection) GetUserApps(userID string) ([]byte, error) {
-	var apps []map[string]interface{}
-	if err := c.Find(bson.M{"owner": userID}).Sort("registeredat").All(&apps); err != nil {
-		return nil, goa.ErrInternal(err)
+// GetUserApps retrieves applications for a user
+func (c *BackendAppsManagementStore) GetUserApps(userID string) ([]byte, error) {
+	var typeHint map[string]interface{}
+	apps, err := c.repository.GetAll(backends.NewFilter().Match("owner", userID), typeHint, "registeredat", "asc", 0, 0)
+	if err != nil {
+		return nil, err
 	}
 
-	if len(apps) == 0 {
-		return nil, goa.ErrNotFound("no apps found!")
-	}
+	appsSerialized := apps.(*[]*map[string]interface{})
+	appsValue := *appsSerialized
 
-	for _, client := range apps {
-		client["id"] = client["_id"]
-		delete(client, "_id")
+	if len(appsValue) == 0 {
+		return nil, goa.ErrNotFound("no apps found")
 	}
 
 	res, err := json.Marshal(apps)
+
 	if err != nil {
 		return nil, goa.ErrInternal(err)
 	}
@@ -160,9 +117,17 @@ func (c *MongoCollection) GetUserApps(userID string) ([]byte, error) {
 	return res, nil
 }
 
-func (c *MongoCollection) RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error) {
-	appID := bson.NewObjectId()
-	registeredAt := int(time.Now().Unix())
+// RegisterApp creates a new application for a user
+func (c *BackendAppsManagementStore) RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error) {
+	existing, err := c.repository.GetOne(backends.NewFilter().Match("name", payload.Name), &ClientApp{})
+	if err != nil && err.Error() != "not found" {
+		return nil, goa.ErrInternal(err)
+	}
+	if existing != nil {
+		return nil, goa.ErrBadRequest("that application already exists")
+	}
+
+	registeredAt := int64(time.Now().Unix())
 	secret, err := GenerateRandomString(42)
 	if err != nil {
 		return nil, goa.ErrInternal(err)
@@ -171,146 +136,171 @@ func (c *MongoCollection) RegisterApp(payload *app.AppPayload, userID string) (*
 		return nil, err
 	}
 
-	err = c.Insert(bson.M{
-		"_id":          appID,
-		"name":         payload.Name,
-		"description":  payload.Description,
-		"domain":       payload.Domain,
-		"owner":        userID,
-		"secret":       secret,
-		"registeredAt": registeredAt,
-	})
-
-	if err != nil {
-		if mgo.IsDup(err) {
-			return nil, goa.ErrBadRequest("application already exists in the database")
-		}
-		return nil, goa.ErrInternal(err)
+	clientApp := &ClientApp{
+		Name:         payload.Name,
+		Description:  *payload.Description,
+		Domain:       *payload.Domain,
+		Owner:        userID,
+		Secret:       secret,
+		RegisteredAt: registeredAt,
 	}
 
-	res := &app.RegApps{
-		ID:     appID.Hex(),
+	res, err := c.repository.Save(clientApp, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	ca := res.(*ClientApp)
+	regApp := &app.RegApps{
+		ID:     ca.ID,
 		Secret: secret,
 	}
 
-	return res, nil
+	return regApp, nil
 }
 
-func (c *MongoCollection) DeleteApp(appID string) error {
-	objectID, err := hexToObjectID(appID)
-	if err != nil {
-		return err
-	}
-
-	err = c.RemoveId(objectID)
+// DeleteApp deletes an application by id
+func (c *BackendAppsManagementStore) DeleteApp(appID string) error {
+	err := c.repository.DeleteOne(backends.NewFilter().Match("id", appID))
 	if err != nil {
 		if err.Error() == "not found" {
-			return goa.ErrNotFound("no apps found!")
-		} else {
-			return goa.ErrInternal(err)
+			return goa.ErrNotFound("no app found!")
 		}
+		return goa.ErrInternal(err)
 	}
 
 	return nil
 }
 
-func (c *MongoCollection) UpdateApp(payload *app.AppPayload, appID string) (*app.Apps, error) {
-	objectID, err := hexToObjectID(appID)
+// UpdateApp updates an application by id
+func (c *BackendAppsManagementStore) UpdateApp(payload *app.AppPayload, appID string) (*app.Apps, error) {
+	res, err := c.repository.GetOne(backends.NewFilter().Match("id", appID), &ClientApp{})
 	if err != nil {
 		return nil, err
 	}
+	existing := res.(*ClientApp)
 
-	err = c.Update(
-		bson.M{"_id": objectID},
-		bson.M{"$set": bson.M{
-			"name":        payload.Name,
-			"description": payload.Description,
-			"domain":      payload.Domain,
-		},
-		})
+	existing.Name = payload.Name
 
+	if payload.Description != nil {
+		existing.Description = *payload.Description
+	}
+
+	if payload.Domain != nil {
+		existing.Domain = *payload.Domain
+	}
+
+	res, err = c.repository.Save(existing, backends.NewFilter().Match("id", appID))
 	if err != nil {
 		if err.Error() == "not found" {
 			return nil, goa.ErrNotFound("application not found.")
-		} else {
-			return nil, goa.ErrInternal(err)
 		}
+		return nil, goa.ErrInternal(err)
 	}
 
-	client, err := c.GetApp(appID)
-	if err != nil {
-		return nil, err
-	}
-	client.ID = appID
+	clientApp := res.(*ClientApp)
 
-	return client, nil
+	return &app.Apps{
+		Description:  clientApp.Description,
+		Domain:       clientApp.Domain,
+		ID:           appID,
+		Name:         clientApp.Name,
+		Owner:        clientApp.Owner,
+		RegisteredAt: int(clientApp.RegisteredAt),
+	}, nil
 }
 
-func (c *MongoCollection) RegenerateSecret(appID string) ([]byte, error) {
-	objectID, err := hexToObjectID(appID)
-	if err != nil {
-		return nil, err
-	}
-
+// RegenerateSecret creates a new secret for an application by id
+func (c *BackendAppsManagementStore) RegenerateSecret(appID string) ([]byte, error) {
 	secret, err := GenerateRandomString(42)
 	if err != nil {
 		return nil, goa.ErrInternal(err)
 	}
 
-	err = c.Update(
-		bson.M{"_id": objectID},
-		bson.M{"$set": bson.M{
-			"secret": secret,
-		},
-		})
+	res, err := c.repository.GetOne(backends.NewFilter().Match("id", appID), &ClientApp{})
+	if err != nil {
+		return nil, err
+	}
+	existing := res.(*ClientApp)
 
+	existing.Secret = secret
+
+	client, err := c.repository.Save(existing, backends.NewFilter().Match("id", appID))
 	if err != nil {
 		if err.Error() == "not found" {
-			return nil, goa.ErrNotFound("application not found")
-		} else {
-			return nil, goa.ErrInternal(err)
+			return nil, goa.ErrNotFound("application not found.")
 		}
-	}
-
-	var client map[string]interface{}
-	if err := c.FindId(objectID).One(&client); err != nil {
 		return nil, goa.ErrInternal(err)
 	}
 
-	client["id"] = client["_id"]
-	client["secret"] = secret
-	delete(client, "_id")
-
-	res, err := json.Marshal(client)
+	resp, err := json.Marshal(client)
 	if err != nil {
 		return nil, goa.ErrInternal(err)
 	}
 
-	return res, nil
+	return resp, nil
 }
 
 // FindApp tries to find an application (client) by its ID and secret.
 // Returns nil if no such app is found.
-func (c *MongoCollection) FindApp(ID, secret string) (*ClientApp, error) {
-	fmt.Println("Find APP")
-	objectID, err := hexToObjectID(ID)
+func (c *BackendAppsManagementStore) FindApp(ID, secret string) (*ClientApp, error) {
+	clientApp, err := c.repository.GetOne(backends.NewFilter().Match("id", ID), &ClientApp{})
 	if err != nil {
 		return nil, err
 	}
-	ca := ClientApp{}
-	err = c.FindId(objectID).One(&ca)
-	if err != nil {
-		fmt.Println("An error: ", err.Error())
-		if err.Error() == "not found" {
-			return nil, nil
-		}
-		return nil, err
-	}
+
+	ca := clientApp.(*ClientApp)
+
 	if ca.Secret == secret {
-		ca.ID = ID
-		return &ca, nil
+		return ca, nil
 	}
+
 	return nil, nil
+}
+
+// NewAppsManagementStore creates new AppsManagementStore implementation that supports multiple backend types.
+func NewAppsManagementStore(cfg *config.DBConfig) (store AppsManagementStore, cleanup func(), err error) {
+	manager := backends.NewBackendSupport(map[string]*config.DBInfo{
+		cfg.DBName: &cfg.DBInfo,
+	})
+
+	noop := func() {}
+	backend, err := manager.GetBackend(cfg.DBName)
+	if err != nil {
+		return nil, noop, err
+	}
+	cleanup = func() {
+		backend.Shutdown()
+	}
+
+	repo, err := backend.DefineRepository("apps-management", backends.RepositoryDefinitionMap{
+		"name": "apps-management",
+		"indexes": []backends.Index{
+			backends.NewUniqueIndex("id"),
+			backends.NewUniqueIndex("name"),
+			backends.NewNonUniqueIndex("registeredAt"),
+		},
+		"hashKey":       "id",
+		"rangeKey":      "name",
+		"readCapacity":  10,
+		"writeCapacity": 10,
+		"GSI": map[string]interface{}{
+			"name": map[string]interface{}{
+				"readCapacity":  1,
+				"writeCapacity": 1,
+			},
+		},
+	})
+	if err != nil {
+		return nil, noop, err
+	}
+
+	store = &BackendAppsManagementStore{
+		repository: repo,
+	}
+
+	return store, cleanup, err
 }
 
 // Convert hex representation of object id to bson object id

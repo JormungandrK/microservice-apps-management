@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -41,6 +42,12 @@ func main() {
 	}
 	defer cleanup()
 
+	store, cleanup, err := db.NewAppsManagementStore(&conf.DBConfig)
+	if err != nil {
+		log.Fatal("Failed to connect to db: ", err)
+	}
+	defer cleanup()
+
 	// Mount middleware
 	service.Use(middleware.RequestID())
 	service.Use(middleware.LogRequest(true))
@@ -49,22 +56,8 @@ func main() {
 
 	service.Use(chain.AsGoaMiddleware(securityChain))
 
-	dbConf := conf.DBConfig
-	// Create new session to MongoDB
-	session := db.NewSession(dbConf.Host, dbConf.Username, dbConf.Password, dbConf.DatabaseName)
-
-	// At the end close session
-	defer session.Close()
-
-	// Create apps collection and indexes
-	index1 := []string{"domain"}
-	index2 := []string{"name"}
-	indexes := [][]string{index1, index2}
-	collectionName := "apps"
-	collection := db.PrepareDB(session, dbConf.DatabaseName, collectionName, indexes)
-
 	// Mount "apps" controller
-	c := NewAppsController(service, &db.MongoCollection{Collection: collection})
+	c := NewAppsController(service, store)
 	app.MountAppsController(service, c)
 	// Mount "swagger" controller
 	c2 := NewSwaggerController(service)

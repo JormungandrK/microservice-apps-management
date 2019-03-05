@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"sync"
 
+	"github.com/Microkubes/backends"
 	"github.com/Microkubes/microservice-apps-management/app"
-	"github.com/goadesign/goa"
 )
 
 // DB emulates a database driver using in-memory data structures.
@@ -30,15 +30,15 @@ func New() *DB {
 // Mock GetApp method
 func (db *DB) GetApp(appID string) (*app.Apps, error) {
 	if appID == "internal-error" {
-		return nil, goa.ErrInternal("inertnal-server-error")
+		return nil, backends.ErrBackendError("internal-server-error")
 	}
 	if appID == "bad-request-error" {
-		return nil, goa.ErrBadRequest("invalid metadata ID")
+		return nil, backends.ErrInvalidInput("invalid metadata ID")
 	}
 
 	client, ok := db.apps[appID]
 	if !ok {
-		return nil, goa.ErrNotFound("app not found")
+		return nil, backends.ErrNotFound("app not found")
 	}
 
 	res := &app.Apps{
@@ -56,12 +56,12 @@ func (db *DB) GetApp(appID string) (*app.Apps, error) {
 // Mock GetUserApps method
 func (db *DB) GetMyApps(userID string) ([]byte, error) {
 	if userID == "internal-error" {
-		return nil, goa.ErrInternal("inertnal-server-error")
+		return nil, backends.ErrBackendError("inertnal-server-error")
 	}
 
 	client, ok := db.apps[userID]
 	if !ok {
-		return nil, goa.ErrNotFound("app not found")
+		return nil, backends.ErrNotFound("app not found")
 	}
 
 	var apps []map[string]interface{}
@@ -78,7 +78,7 @@ func (db *DB) GetMyApps(userID string) ([]byte, error) {
 
 	res, err := json.Marshal(apps)
 	if err != nil {
-		return nil, goa.ErrInternal(err)
+		return nil, backends.ErrBackendError(err)
 	}
 
 	return res, nil
@@ -87,12 +87,12 @@ func (db *DB) GetMyApps(userID string) ([]byte, error) {
 // Mock GetUserApps method
 func (db *DB) GetUserApps(userID string) ([]byte, error) {
 	if userID == "internal-error" {
-		return nil, goa.ErrInternal("inertnal-server-error")
+		return nil, backends.ErrBackendError("inertnal-server-error")
 	}
 
 	client, ok := db.apps[userID]
 	if !ok {
-		return nil, goa.ErrNotFound("app not found")
+		return nil, backends.ErrNotFound("app not found")
 	}
 
 	var apps []map[string]interface{}
@@ -110,7 +110,7 @@ func (db *DB) GetUserApps(userID string) ([]byte, error) {
 
 	res, err := json.Marshal(apps)
 	if err != nil {
-		return nil, goa.ErrInternal(err)
+		return nil, backends.ErrBackendError(err)
 	}
 
 	return res, nil
@@ -119,10 +119,10 @@ func (db *DB) GetUserApps(userID string) ([]byte, error) {
 // Mock RegisterApp method
 func (db *DB) RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps, error) {
 	if userID == "internal-error" {
-		return nil, goa.ErrInternal("inertnal-server-error")
+		return nil, backends.ErrBackendError("inertnal-server-error")
 	}
 	if userID == "bad-request-error" {
-		return nil, goa.ErrBadRequest("invalid user ID")
+		return nil, backends.ErrInvalidInput("invalid user ID")
 	}
 
 	db.apps["qwe5c461f9f8ebrtaae05zzz"] = payload
@@ -139,16 +139,16 @@ func (db *DB) RegisterApp(payload *app.AppPayload, userID string) (*app.RegApps,
 // Mock DeleteApp method
 func (db *DB) DeleteApp(appID string) error {
 	if appID == "internal-error" {
-		return goa.ErrInternal("inertnal-server-error")
+		return backends.ErrBackendError("inertnal-server-error")
 	}
 	if appID == "bad-request-error" {
-		return goa.ErrBadRequest("inalid ID")
+		return backends.ErrInvalidInput("inalid ID")
 	}
 
 	if _, ok := db.apps[appID]; ok {
 		delete(db.apps, appID)
 	} else {
-		return goa.ErrNotFound("app not found!")
+		return backends.ErrNotFound("app not found!")
 	}
 
 	return nil
@@ -157,16 +157,16 @@ func (db *DB) DeleteApp(appID string) error {
 // Mock UpdateApp method
 func (db *DB) UpdateApp(payload *app.AppPayload, appID string) (*app.Apps, error) {
 	if appID == "internal-error" {
-		return nil, goa.ErrInternal("inertnal-server-error")
+		return nil, backends.ErrBackendError("inertnal-server-error")
 	}
 	if appID == "bad-request-error" {
-		return nil, goa.ErrBadRequest("invalid user ID")
+		return nil, backends.ErrInvalidInput("invalid user ID")
 	}
 
 	if _, ok := db.apps[appID]; ok {
 		db.apps[appID] = payload
 	} else {
-		return nil, goa.ErrNotFound("app not found!")
+		return nil, backends.ErrNotFound("app not found!")
 	}
 
 	res := &app.Apps{
@@ -184,14 +184,14 @@ func (db *DB) UpdateApp(payload *app.AppPayload, appID string) (*app.Apps, error
 // Mock RegenerateSecret method
 func (db *DB) RegenerateSecret(appID string) ([]byte, error) {
 	if appID == "internal-error" {
-		return nil, goa.ErrInternal("inertnal-server-error")
+		return nil, backends.ErrBackendError("inertnal-server-error")
 	}
 	if appID == "bad-request-error" {
-		return nil, goa.ErrBadRequest("invalid user ID")
+		return nil, backends.ErrInvalidInput("invalid user ID")
 	}
 
 	if _, ok := db.apps[appID]; !ok {
-		return nil, goa.ErrNotFound("app not found!")
+		return nil, backends.ErrNotFound("app not found!")
 	}
 
 	name := "app-name"
@@ -208,7 +208,7 @@ func (db *DB) RegenerateSecret(appID string) ([]byte, error) {
 
 	res, err := json.Marshal(client)
 	if err != nil {
-		return nil, goa.ErrInternal(err)
+		return nil, backends.ErrBackendError(err)
 	}
 
 	return res, nil
