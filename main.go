@@ -14,6 +14,8 @@ import (
 	"github.com/Microkubes/microservice-security/flow"
 	"github.com/Microkubes/microservice-tools/config"
 	"github.com/Microkubes/microservice-tools/gateway"
+	"github.com/Microkubes/microservice-tools/utils"
+	"github.com/Microkubes/microservice-tools/utils/version"
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"
 )
@@ -55,6 +57,10 @@ func main() {
 	service.Use(middleware.Recover())
 
 	service.Use(chain.AsGoaMiddleware(securityChain))
+
+	service.Use(healthcheck.NewCheckMiddleware("/healthcheck"))
+
+	service.Use(version.NewVersionMiddleware(conf.Version, "/version"))
 
 	// Mount "apps" controller
 	c := NewAppsController(service, store)

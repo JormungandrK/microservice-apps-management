@@ -8,6 +8,7 @@
     "slots": 100
   },
   "gatewayUrl": "http://kong:8000",
+  "version": "v1.0.2-beta",
   "security":{
     "keysDir": "/run/secrets",
     "jwt":{
