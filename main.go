@@ -14,7 +14,7 @@ import (
 	"github.com/Microkubes/microservice-security/flow"
 	"github.com/Microkubes/microservice-tools/config"
 	"github.com/Microkubes/microservice-tools/gateway"
-	"github.com/Microkubes/microservice-tools/utils"
+	"github.com/Microkubes/microservice-tools/utils/healthcheck"
 	"github.com/Microkubes/microservice-tools/utils/version"
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"
