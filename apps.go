@@ -7,7 +7,7 @@ import (
 	"github.com/Microkubes/microservice-apps-management/app"
 	"github.com/Microkubes/microservice-apps-management/db"
 	"github.com/Microkubes/microservice-security/auth"
-	"github.com/goadesign/goa"
+	"github.com/keitaroinc/goa"
 )
 
 // AppsController implements the apps resource.

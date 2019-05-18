@@ -12,7 +12,7 @@ import (
 	"github.com/Microkubes/microservice-apps-management/app"
 	"github.com/Microkubes/microservice-tools/config"
 	"github.com/asaskevich/govalidator"
-	"github.com/goadesign/goa"
+	"github.com/keitaroinc/goa"
 )
 
 // AppsManagementStore defaines the interface for accessing the application data.
