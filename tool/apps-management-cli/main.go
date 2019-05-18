@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Microkubes/microservice-apps-management/client"
 	"github.com/Microkubes/microservice-apps-management/tool/cli"
-	goaclient "github.com/goadesign/goa/client"
+	goaclient "github.com/keitaroinc/goa/client"
 	"github.com/spf13/cobra"
 	"net/http"
 	"os"

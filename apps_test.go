@@ -8,7 +8,7 @@ import (
 	"github.com/Microkubes/microservice-apps-management/app/test"
 	"github.com/Microkubes/microservice-apps-management/db"
 	"github.com/Microkubes/microservice-security/auth"
-	"github.com/goadesign/goa"
+	"github.com/keitaroinc/goa"
 )
 
 var (
