@@ -3,7 +3,7 @@ module github.com/Microkubes/microservice-apps-management
 go 1.13
 
 require (
-	github.com/Microkubes/backends v1.1.0
+	github.com/Microkubes/backends v1.1.2
 	github.com/Microkubes/microservice-security v1.2.1
 	github.com/Microkubes/microservice-tools v1.1.0
 	github.com/asaskevich/govalidator v0.0.0-20190424111038-f61b66f89f4a

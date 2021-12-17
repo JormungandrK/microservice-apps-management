@@ -11,8 +11,6 @@ RUN cd /go/src/github.com/Microkubes/microservice-apps-management && \
 ### Main
 FROM alpine:3.10
 
-ENV API_GATEWAY_URL="http://localhost:8001"
-
 COPY --from=build /go/src/github.com/Microkubes/microservice-apps-management/config.json /config.json
 COPY --from=build /go/bin/microservice-apps-management /microservice-apps-management
 

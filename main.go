@@ -5,7 +5,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/Microkubes/microservice-apps-management/app"
@@ -13,7 +12,6 @@ import (
 	"github.com/Microkubes/microservice-security/chain"
 	"github.com/Microkubes/microservice-security/flow"
 	"github.com/Microkubes/microservice-tools/config"
-	"github.com/Microkubes/microservice-tools/gateway"
 	"github.com/Microkubes/microservice-tools/utils/healthcheck"
 	"github.com/Microkubes/microservice-tools/utils/version"
 	"github.com/keitaroinc/goa"
@@ -25,17 +23,13 @@ func main() {
 	service := goa.New("apps-management")
 
 	// Load configuration
-	gatewayAdminURL, configFile := loadGatewaySettings()
+	configFile := loadConfigSettings()
 
 	conf, err := config.LoadConfig(configFile)
 	if err != nil {
 		service.LogError("config", "err", err)
 		return
 	}
-
-	// Gateway self-registration
-	unregisterService := registerMicroservice(gatewayAdminURL, conf)
-	defer unregisterService() // defer the unregister for after main exits
 
 	// create security chain
 	securityChain, cleanup, err := flow.NewSecurityFromConfig(conf)
@@ -76,29 +70,12 @@ func main() {
 
 }
 
-func loadGatewaySettings() (string, string) {
-	gatewayURL := os.Getenv("API_GATEWAY_URL")
+func loadConfigSettings() string {
 	serviceConfigFile := os.Getenv("SERVICE_CONFIG_FILE")
 
-	if gatewayURL == "" {
-		gatewayURL = "http://localhost:8001"
-	}
 	if serviceConfigFile == "" {
 		serviceConfigFile = "/run/secrets/microservice_apps_management_config.json"
 	}
 
-	return gatewayURL, serviceConfigFile
-}
-
-func registerMicroservice(gatewayAdminURL string, conf *config.ServiceConfig) func() {
-	registration := gateway.NewKongGateway(gatewayAdminURL, &http.Client{}, conf.Service)
-
-	err := registration.SelfRegister()
-	if err != nil {
-		panic(err)
-	}
-
-	return func() {
-		registration.Unregister()
-	}
+	return serviceConfigFile
 }
