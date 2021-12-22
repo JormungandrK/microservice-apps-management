@@ -17,7 +17,7 @@ var _ = API("apps-management", func() {
 
 // Resources group related API endpoints together.
 var _ = Resource("apps", func() {
-	BasePath("/apps")
+	BasePath("/")
 
 	// Alows preflight request - HTTP OPTIONS
 	Origin("*", func() {

@@ -49,12 +49,12 @@ type AppsController interface {
 func MountAppsController(service *goa.Service, ctrl AppsController) {
 	initService(service)
 	var h goa.Handler
-	service.Mux.Handle("OPTIONS", "/apps/:appId", ctrl.MuxHandler("preflight", handleAppsOrigin(cors.HandlePreflight()), nil))
-	service.Mux.Handle("OPTIONS", "/apps/my", ctrl.MuxHandler("preflight", handleAppsOrigin(cors.HandlePreflight()), nil))
-	service.Mux.Handle("OPTIONS", "/apps/users/:userId/all", ctrl.MuxHandler("preflight", handleAppsOrigin(cors.HandlePreflight()), nil))
-	service.Mux.Handle("OPTIONS", "/apps/:appId/regenerate-secret", ctrl.MuxHandler("preflight", handleAppsOrigin(cors.HandlePreflight()), nil))
-	service.Mux.Handle("OPTIONS", "/apps", ctrl.MuxHandler("preflight", handleAppsOrigin(cors.HandlePreflight()), nil))
-	service.Mux.Handle("OPTIONS", "/apps/verify", ctrl.MuxHandler("preflight", handleAppsOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/:appId", ctrl.MuxHandler("preflight", handleAppsOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/my", ctrl.MuxHandler("preflight", handleAppsOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/users/:userId/all", ctrl.MuxHandler("preflight", handleAppsOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/:appId/regenerate-secret", ctrl.MuxHandler("preflight", handleAppsOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/", ctrl.MuxHandler("preflight", handleAppsOrigin(cors.HandlePreflight()), nil))
+	service.Mux.Handle("OPTIONS", "/verify", ctrl.MuxHandler("preflight", handleAppsOrigin(cors.HandlePreflight()), nil))
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -69,8 +69,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		return ctrl.DeleteApp(rctx)
 	}
 	h = handleAppsOrigin(h)
-	service.Mux.Handle("DELETE", "/apps/:appId", ctrl.MuxHandler("deleteApp", h, nil))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "DeleteApp", "route", "DELETE /apps/:appId")
+	service.Mux.Handle("DELETE", "/:appId", ctrl.MuxHandler("deleteApp", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "DeleteApp", "route", "DELETE /:appId")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -85,8 +85,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		return ctrl.Get(rctx)
 	}
 	h = handleAppsOrigin(h)
-	service.Mux.Handle("GET", "/apps/:appId", ctrl.MuxHandler("get", h, nil))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "Get", "route", "GET /apps/:appId")
+	service.Mux.Handle("GET", "/:appId", ctrl.MuxHandler("get", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "Get", "route", "GET /:appId")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -101,8 +101,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		return ctrl.GetMyApps(rctx)
 	}
 	h = handleAppsOrigin(h)
-	service.Mux.Handle("GET", "/apps/my", ctrl.MuxHandler("getMyApps", h, nil))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "GetMyApps", "route", "GET /apps/my")
+	service.Mux.Handle("GET", "/my", ctrl.MuxHandler("getMyApps", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "GetMyApps", "route", "GET /my")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -117,8 +117,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		return ctrl.GetUserApps(rctx)
 	}
 	h = handleAppsOrigin(h)
-	service.Mux.Handle("GET", "/apps/users/:userId/all", ctrl.MuxHandler("getUserApps", h, nil))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "GetUserApps", "route", "GET /apps/users/:userId/all")
+	service.Mux.Handle("GET", "/users/:userId/all", ctrl.MuxHandler("getUserApps", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "GetUserApps", "route", "GET /users/:userId/all")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -133,8 +133,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		return ctrl.RegenerateClientSecret(rctx)
 	}
 	h = handleAppsOrigin(h)
-	service.Mux.Handle("PUT", "/apps/:appId/regenerate-secret", ctrl.MuxHandler("regenerateClientSecret", h, nil))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "RegenerateClientSecret", "route", "PUT /apps/:appId/regenerate-secret")
+	service.Mux.Handle("PUT", "/:appId/regenerate-secret", ctrl.MuxHandler("regenerateClientSecret", h, nil))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "RegenerateClientSecret", "route", "PUT /:appId/regenerate-secret")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -155,8 +155,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		return ctrl.RegisterApp(rctx)
 	}
 	h = handleAppsOrigin(h)
-	service.Mux.Handle("POST", "/apps", ctrl.MuxHandler("registerApp", h, unmarshalRegisterAppAppsPayload))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "RegisterApp", "route", "POST /apps")
+	service.Mux.Handle("POST", "/", ctrl.MuxHandler("registerApp", h, unmarshalRegisterAppAppsPayload))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "RegisterApp", "route", "POST /")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -177,8 +177,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		return ctrl.UpdateApp(rctx)
 	}
 	h = handleAppsOrigin(h)
-	service.Mux.Handle("PUT", "/apps/:appId", ctrl.MuxHandler("updateApp", h, unmarshalUpdateAppAppsPayload))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "UpdateApp", "route", "PUT /apps/:appId")
+	service.Mux.Handle("PUT", "/:appId", ctrl.MuxHandler("updateApp", h, unmarshalUpdateAppAppsPayload))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "UpdateApp", "route", "PUT /:appId")
 
 	h = func(ctx context.Context, rw http.ResponseWriter, req *http.Request) error {
 		// Check if there was an error loading the request
@@ -199,8 +199,8 @@ func MountAppsController(service *goa.Service, ctrl AppsController) {
 		return ctrl.VerifyApp(rctx)
 	}
 	h = handleAppsOrigin(h)
-	service.Mux.Handle("POST", "/apps/verify", ctrl.MuxHandler("verifyApp", h, unmarshalVerifyAppAppsPayload))
-	service.LogInfo("mount", "ctrl", "Apps", "action", "VerifyApp", "route", "POST /apps/verify")
+	service.Mux.Handle("POST", "/verify", ctrl.MuxHandler("verifyApp", h, unmarshalVerifyAppAppsPayload))
+	service.LogInfo("mount", "ctrl", "Apps", "action", "VerifyApp", "route", "POST /verify")
 }
 
 // handleAppsOrigin applies the CORS response headers corresponding to the origin.

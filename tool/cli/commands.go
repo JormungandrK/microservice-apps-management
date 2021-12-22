@@ -98,7 +98,7 @@ func RegisterCommands(app *cobra.Command, c *client.Client) {
 	}
 	tmp1 := new(DeleteAppAppsCommand)
 	sub = &cobra.Command{
-		Use:   `apps ["/apps/APPID"]`,
+		Use:   `apps ["/APPID"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp1.Run(c, args) },
 	}
@@ -112,7 +112,7 @@ func RegisterCommands(app *cobra.Command, c *client.Client) {
 	}
 	tmp2 := new(GetAppsCommand)
 	sub = &cobra.Command{
-		Use:   `apps ["/apps/APPID"]`,
+		Use:   `apps ["/APPID"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp2.Run(c, args) },
 	}
@@ -126,7 +126,7 @@ func RegisterCommands(app *cobra.Command, c *client.Client) {
 	}
 	tmp3 := new(GetMyAppsAppsCommand)
 	sub = &cobra.Command{
-		Use:   `apps ["/apps/my"]`,
+		Use:   `apps ["/my"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp3.Run(c, args) },
 	}
@@ -140,7 +140,7 @@ func RegisterCommands(app *cobra.Command, c *client.Client) {
 	}
 	tmp4 := new(GetUserAppsAppsCommand)
 	sub = &cobra.Command{
-		Use:   `apps ["/apps/users/USERID/all"]`,
+		Use:   `apps ["/users/USERID/all"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp4.Run(c, args) },
 	}
@@ -154,7 +154,7 @@ func RegisterCommands(app *cobra.Command, c *client.Client) {
 	}
 	tmp5 := new(RegenerateClientSecretAppsCommand)
 	sub = &cobra.Command{
-		Use:   `apps ["/apps/APPID/regenerate-secret"]`,
+		Use:   `apps ["/APPID/regenerate-secret"]`,
 		Short: ``,
 		RunE:  func(cmd *cobra.Command, args []string) error { return tmp5.Run(c, args) },
 	}
@@ -168,7 +168,7 @@ func RegisterCommands(app *cobra.Command, c *client.Client) {
 	}
 	tmp6 := new(RegisterAppAppsCommand)
 	sub = &cobra.Command{
-		Use:   `apps ["/apps"]`,
+		Use:   `apps ["/"]`,
 		Short: ``,
 		Long: `
 
@@ -191,7 +191,7 @@ Payload example:
 	}
 	tmp7 := new(UpdateAppAppsCommand)
 	sub = &cobra.Command{
-		Use:   `apps ["/apps/APPID"]`,
+		Use:   `apps ["/APPID"]`,
 		Short: ``,
 		Long: `
 
@@ -214,7 +214,7 @@ Payload example:
 	}
 	tmp8 := new(VerifyAppAppsCommand)
 	sub = &cobra.Command{
-		Use:   `apps ["/apps/verify"]`,
+		Use:   `apps ["/verify"]`,
 		Short: ``,
 		Long: `
 
@@ -449,7 +449,7 @@ func (cmd *DeleteAppAppsCommand) Run(c *client.Client, args []string) error {
 	if len(args) > 0 {
 		path = args[0]
 	} else {
-		path = fmt.Sprintf("/apps/%v", url.QueryEscape(cmd.AppID))
+		path = fmt.Sprintf("/%v", url.QueryEscape(cmd.AppID))
 	}
 	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
 	ctx := goa.WithLogger(context.Background(), logger)
@@ -475,7 +475,7 @@ func (cmd *GetAppsCommand) Run(c *client.Client, args []string) error {
 	if len(args) > 0 {
 		path = args[0]
 	} else {
-		path = fmt.Sprintf("/apps/%v", url.QueryEscape(cmd.AppID))
+		path = fmt.Sprintf("/%v", url.QueryEscape(cmd.AppID))
 	}
 	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
 	ctx := goa.WithLogger(context.Background(), logger)
@@ -501,7 +501,7 @@ func (cmd *GetMyAppsAppsCommand) Run(c *client.Client, args []string) error {
 	if len(args) > 0 {
 		path = args[0]
 	} else {
-		path = "/apps/my"
+		path = "/my"
 	}
 	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
 	ctx := goa.WithLogger(context.Background(), logger)
@@ -525,7 +525,7 @@ func (cmd *GetUserAppsAppsCommand) Run(c *client.Client, args []string) error {
 	if len(args) > 0 {
 		path = args[0]
 	} else {
-		path = fmt.Sprintf("/apps/users/%v/all", url.QueryEscape(cmd.UserID))
+		path = fmt.Sprintf("/users/%v/all", url.QueryEscape(cmd.UserID))
 	}
 	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
 	ctx := goa.WithLogger(context.Background(), logger)
@@ -551,7 +551,7 @@ func (cmd *RegenerateClientSecretAppsCommand) Run(c *client.Client, args []strin
 	if len(args) > 0 {
 		path = args[0]
 	} else {
-		path = fmt.Sprintf("/apps/%v/regenerate-secret", url.QueryEscape(cmd.AppID))
+		path = fmt.Sprintf("/%v/regenerate-secret", url.QueryEscape(cmd.AppID))
 	}
 	logger := goa.NewLogger(log.New(os.Stderr, "", log.LstdFlags))
 	ctx := goa.WithLogger(context.Background(), logger)
@@ -577,7 +577,7 @@ func (cmd *RegisterAppAppsCommand) Run(c *client.Client, args []string) error {
 	if len(args) > 0 {
 		path = args[0]
 	} else {
-		path = "/apps"
+		path = "/"
 	}
 	var payload client.AppPayload
 	if cmd.Payload != "" {
@@ -610,7 +610,7 @@ func (cmd *UpdateAppAppsCommand) Run(c *client.Client, args []string) error {
 	if len(args) > 0 {
 		path = args[0]
 	} else {
-		path = fmt.Sprintf("/apps/%v", url.QueryEscape(cmd.AppID))
+		path = fmt.Sprintf("/%v", url.QueryEscape(cmd.AppID))
 	}
 	var payload client.AppPayload
 	if cmd.Payload != "" {
@@ -645,7 +645,7 @@ func (cmd *VerifyAppAppsCommand) Run(c *client.Client, args []string) error {
 	if len(args) > 0 {
 		path = args[0]
 	} else {
-		path = "/apps/verify"
+		path = "/verify"
 	}
 	var payload client.AppCredentialsPayload
 	if cmd.Payload != "" {

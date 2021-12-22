@@ -49,7 +49,7 @@ func DeleteAppAppsBadRequest(t goatest.TInterface, ctx context.Context, service 
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v", appID),
+		Path: fmt.Sprintf("/%v", appID),
 	}
 	req, err := http.NewRequest("DELETE", u.String(), nil)
 	if err != nil {
@@ -118,7 +118,7 @@ func DeleteAppAppsInternalServerError(t goatest.TInterface, ctx context.Context,
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v", appID),
+		Path: fmt.Sprintf("/%v", appID),
 	}
 	req, err := http.NewRequest("DELETE", u.String(), nil)
 	if err != nil {
@@ -187,7 +187,7 @@ func DeleteAppAppsNotFound(t goatest.TInterface, ctx context.Context, service *g
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v", appID),
+		Path: fmt.Sprintf("/%v", appID),
 	}
 	req, err := http.NewRequest("DELETE", u.String(), nil)
 	if err != nil {
@@ -255,7 +255,7 @@ func DeleteAppAppsOK(t goatest.TInterface, ctx context.Context, service *goa.Ser
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v", appID),
+		Path: fmt.Sprintf("/%v", appID),
 	}
 	req, err := http.NewRequest("DELETE", u.String(), nil)
 	if err != nil {
@@ -317,7 +317,7 @@ func GetAppsBadRequest(t goatest.TInterface, ctx context.Context, service *goa.S
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v", appID),
+		Path: fmt.Sprintf("/%v", appID),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -386,7 +386,7 @@ func GetAppsInternalServerError(t goatest.TInterface, ctx context.Context, servi
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v", appID),
+		Path: fmt.Sprintf("/%v", appID),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -455,7 +455,7 @@ func GetAppsNotFound(t goatest.TInterface, ctx context.Context, service *goa.Ser
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v", appID),
+		Path: fmt.Sprintf("/%v", appID),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -524,7 +524,7 @@ func GetAppsOK(t goatest.TInterface, ctx context.Context, service *goa.Service, 
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v", appID),
+		Path: fmt.Sprintf("/%v", appID),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -598,7 +598,7 @@ func GetMyAppsAppsInternalServerError(t goatest.TInterface, ctx context.Context,
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/my"),
+		Path: fmt.Sprintf("/my"),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -666,7 +666,7 @@ func GetMyAppsAppsNotFound(t goatest.TInterface, ctx context.Context, service *g
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/my"),
+		Path: fmt.Sprintf("/my"),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -733,7 +733,7 @@ func GetMyAppsAppsOK(t goatest.TInterface, ctx context.Context, service *goa.Ser
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/my"),
+		Path: fmt.Sprintf("/my"),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -794,7 +794,7 @@ func GetUserAppsAppsInternalServerError(t goatest.TInterface, ctx context.Contex
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/users/%v/all", userID),
+		Path: fmt.Sprintf("/users/%v/all", userID),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -863,7 +863,7 @@ func GetUserAppsAppsNotFound(t goatest.TInterface, ctx context.Context, service 
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/users/%v/all", userID),
+		Path: fmt.Sprintf("/users/%v/all", userID),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -931,7 +931,7 @@ func GetUserAppsAppsOK(t goatest.TInterface, ctx context.Context, service *goa.S
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/users/%v/all", userID),
+		Path: fmt.Sprintf("/users/%v/all", userID),
 	}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -993,7 +993,7 @@ func RegenerateClientSecretAppsBadRequest(t goatest.TInterface, ctx context.Cont
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v/regenerate-secret", appID),
+		Path: fmt.Sprintf("/%v/regenerate-secret", appID),
 	}
 	req, err := http.NewRequest("PUT", u.String(), nil)
 	if err != nil {
@@ -1062,7 +1062,7 @@ func RegenerateClientSecretAppsInternalServerError(t goatest.TInterface, ctx con
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v/regenerate-secret", appID),
+		Path: fmt.Sprintf("/%v/regenerate-secret", appID),
 	}
 	req, err := http.NewRequest("PUT", u.String(), nil)
 	if err != nil {
@@ -1131,7 +1131,7 @@ func RegenerateClientSecretAppsNotFound(t goatest.TInterface, ctx context.Contex
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v/regenerate-secret", appID),
+		Path: fmt.Sprintf("/%v/regenerate-secret", appID),
 	}
 	req, err := http.NewRequest("PUT", u.String(), nil)
 	if err != nil {
@@ -1199,7 +1199,7 @@ func RegenerateClientSecretAppsOK(t goatest.TInterface, ctx context.Context, ser
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v/regenerate-secret", appID),
+		Path: fmt.Sprintf("/%v/regenerate-secret", appID),
 	}
 	req, err := http.NewRequest("PUT", u.String(), nil)
 	if err != nil {
@@ -1271,7 +1271,7 @@ func RegisterAppAppsBadRequest(t goatest.TInterface, ctx context.Context, servic
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps"),
+		Path: fmt.Sprintf("/"),
 	}
 	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
@@ -1351,7 +1351,7 @@ func RegisterAppAppsCreated(t goatest.TInterface, ctx context.Context, service *
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps"),
+		Path: fmt.Sprintf("/"),
 	}
 	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
@@ -1435,7 +1435,7 @@ func RegisterAppAppsInternalServerError(t goatest.TInterface, ctx context.Contex
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps"),
+		Path: fmt.Sprintf("/"),
 	}
 	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
@@ -1514,7 +1514,7 @@ func UpdateAppAppsBadRequest(t goatest.TInterface, ctx context.Context, service 
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v", appID),
+		Path: fmt.Sprintf("/%v", appID),
 	}
 	req, _err := http.NewRequest("PUT", u.String(), nil)
 	if _err != nil {
@@ -1594,7 +1594,7 @@ func UpdateAppAppsInternalServerError(t goatest.TInterface, ctx context.Context,
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v", appID),
+		Path: fmt.Sprintf("/%v", appID),
 	}
 	req, _err := http.NewRequest("PUT", u.String(), nil)
 	if _err != nil {
@@ -1674,7 +1674,7 @@ func UpdateAppAppsNotFound(t goatest.TInterface, ctx context.Context, service *g
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v", appID),
+		Path: fmt.Sprintf("/%v", appID),
 	}
 	req, _err := http.NewRequest("PUT", u.String(), nil)
 	if _err != nil {
@@ -1755,7 +1755,7 @@ func UpdateAppAppsOK(t goatest.TInterface, ctx context.Context, service *goa.Ser
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/%v", appID),
+		Path: fmt.Sprintf("/%v", appID),
 	}
 	req, _err := http.NewRequest("PUT", u.String(), nil)
 	if _err != nil {
@@ -1840,7 +1840,7 @@ func VerifyAppAppsInternalServerError(t goatest.TInterface, ctx context.Context,
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/verify"),
+		Path: fmt.Sprintf("/verify"),
 	}
 	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
@@ -1919,7 +1919,7 @@ func VerifyAppAppsNotFound(t goatest.TInterface, ctx context.Context, service *g
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/verify"),
+		Path: fmt.Sprintf("/verify"),
 	}
 	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {
@@ -1999,7 +1999,7 @@ func VerifyAppAppsOK(t goatest.TInterface, ctx context.Context, service *goa.Ser
 	// Setup request context
 	rw := httptest.NewRecorder()
 	u := &url.URL{
-		Path: fmt.Sprintf("/apps/verify"),
+		Path: fmt.Sprintf("/verify"),
 	}
 	req, _err := http.NewRequest("POST", u.String(), nil)
 	if _err != nil {

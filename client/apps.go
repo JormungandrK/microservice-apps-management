@@ -22,7 +22,7 @@ import (
 func DeleteAppAppsPath(appID string) string {
 	param0 := appID
 
-	return fmt.Sprintf("/apps/%s", param0)
+	return fmt.Sprintf("/%s", param0)
 }
 
 // Delete an app
@@ -52,7 +52,7 @@ func (c *Client) NewDeleteAppAppsRequest(ctx context.Context, path string) (*htt
 func GetAppsPath(appID string) string {
 	param0 := appID
 
-	return fmt.Sprintf("/apps/%s", param0)
+	return fmt.Sprintf("/%s", param0)
 }
 
 // Get app by id
@@ -81,7 +81,7 @@ func (c *Client) NewGetAppsRequest(ctx context.Context, path string) (*http.Requ
 // GetMyAppsAppsPath computes a request path to the getMyApps action of apps.
 func GetMyAppsAppsPath() string {
 
-	return fmt.Sprintf("/apps/my")
+	return fmt.Sprintf("/my")
 }
 
 // Get all user's apps
@@ -111,7 +111,7 @@ func (c *Client) NewGetMyAppsAppsRequest(ctx context.Context, path string) (*htt
 func GetUserAppsAppsPath(userID string) string {
 	param0 := userID
 
-	return fmt.Sprintf("/apps/users/%s/all", param0)
+	return fmt.Sprintf("/users/%s/all", param0)
 }
 
 // Get app by id
@@ -141,7 +141,7 @@ func (c *Client) NewGetUserAppsAppsRequest(ctx context.Context, path string) (*h
 func RegenerateClientSecretAppsPath(appID string) string {
 	param0 := appID
 
-	return fmt.Sprintf("/apps/%s/regenerate-secret", param0)
+	return fmt.Sprintf("/%s/regenerate-secret", param0)
 }
 
 // Regenerate client secret
@@ -170,7 +170,7 @@ func (c *Client) NewRegenerateClientSecretAppsRequest(ctx context.Context, path 
 // RegisterAppAppsPath computes a request path to the registerApp action of apps.
 func RegisterAppAppsPath() string {
 
-	return fmt.Sprintf("/apps")
+	return fmt.Sprintf("/")
 }
 
 // Register new app
@@ -214,7 +214,7 @@ func (c *Client) NewRegisterAppAppsRequest(ctx context.Context, path string, pay
 func UpdateAppAppsPath(appID string) string {
 	param0 := appID
 
-	return fmt.Sprintf("/apps/%s", param0)
+	return fmt.Sprintf("/%s", param0)
 }
 
 // Register new app
@@ -257,7 +257,7 @@ func (c *Client) NewUpdateAppAppsRequest(ctx context.Context, path string, paylo
 // VerifyAppAppsPath computes a request path to the verifyApp action of apps.
 func VerifyAppAppsPath() string {
 
-	return fmt.Sprintf("/apps/verify")
+	return fmt.Sprintf("/verify")
 }
 
 // Verify an application by its ID and secret
